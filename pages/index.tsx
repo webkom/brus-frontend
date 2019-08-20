@@ -1,15 +1,16 @@
 import React, { useReducer, useRef, useState, useEffect } from "react";
 import mqtt, { MqttClient } from "mqtt";
 import { useRouter } from "next/router";
+import Head from "next/head";
 
 type Choice = {
   title: string;
   value: string;
 };
 const choices: Choice[] = [
-  { title: "Dahls flaske", value: "beer" },
-  { title: "Boksbrus", value: "can" },
-  { title: "Brus", value: "bottle" }
+  { title: "Dahls flaske", value: "beer_dahls_bottle" },
+  { title: "Boksbrus", value: "soda_can" },
+  { title: "Brus", value: "soda_bottle" }
 ];
 //
 // one component does all the things!
@@ -29,7 +30,7 @@ const BrusGuiAsASingleFunction = () => {
       JSON.stringify(
         data
           .filter(([, count]) => count)
-          .map(([choice, count]) => ({ type: choice.value, count }))
+          .map(([choice, count]) => ({ product_name: choice.value, count }))
       )
     );
   }, [data]);
@@ -63,42 +64,50 @@ const BrusGuiAsASingleFunction = () => {
 
   return (
     <>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta charSet="utf-8" />
+      </Head>
+      <style global jsx>{`
+        html,
+        button {
+          font-size: 60px;
+        }
+      `}</style>
       <div> Handleliste </div>
-      {lastMsgObj ? (
-        <h1>{lastMsgObj[0]}</h1>
-      ) : (
-        data.map(([choice, count]) => (
-          <div key={choice.value}>
-            {" "}
-            {count}
-            <button
-              onClick={() => {
-                setData(data =>
-                  data.map(([c, count]) =>
-                    c === choice ? [c, count + 1] : [c, count]
-                  )
-                );
-              }}
-            >
+      {lastMsgObj
+        ? lastMsgObj[0]
+        : data.map(([choice, count]) => (
+            <div key={choice.value}>
               {" "}
-              +
-            </button>
-            <button
-              onClick={() => {
-                setData(data =>
-                  data.map(([c, count]) =>
-                    c === choice ? [c, (count || 1) - 1] : [c, count]
-                  )
-                );
-              }}
-            >
-              {" "}
-              -
-            </button>
-            - {choice.title}
-          </div>
-        ))
-      )}
+              {count}
+              <button
+                onClick={() => {
+                  setData(data =>
+                    data.map(([c, count]) =>
+                      c === choice ? [c, count + 1] : [c, count]
+                    )
+                  );
+                }}
+              >
+                {" "}
+                +
+              </button>
+              <button
+                onClick={() => {
+                  setData(data =>
+                    data.map(([c, count]) =>
+                      c === choice ? [c, (count || 1) - 1] : [c, count]
+                    )
+                  );
+                }}
+              >
+                {" "}
+                -{" "}
+              </button>
+              {choice.title}
+            </div>
+          ))}
     </>
   );
 };
