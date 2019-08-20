@@ -1,0 +1,20 @@
+{
+  "name": "brus",
+  "version": "1.0.0",
+  "description": "brus-v",
+  "author": "Odin Ugedal",
+  "license": "MIT",
+  "scripts": {"build": "next build"},
+  "dependencies": {
+    "@types/mqtt": "^2.5.0",
+    "mqtt": "^3.0.0",
+    "next": "^9.0.3",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^12.7.2",
+    "@types/react": "^16.9.2",
+    "typescript": "^3.5.3"
+  }
+}
