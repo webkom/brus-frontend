@@ -126,7 +126,7 @@ const useMqttTopic = (
       console.log(`Connected to ${url}`);
       client.current.subscribe(topic, (err: any) => {
         if (err) return console.error(err);
-        console.log(`Subscribed to "${topic}"`);
+        console.log(`Subscribed to bard: "${topic}"`);
       });
     });
 

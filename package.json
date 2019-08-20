@@ -4,7 +4,9 @@
   "description": "brus-v",
   "author": "Odin Ugedal",
   "license": "MIT",
-  "scripts": {"build": "next build"},
+  "scripts": {
+      "now-build": "npm run prepare && sed -i 1,2d node_modules/mqtt/mqtt.js && next build"
+  },
   "dependencies": {
     "@types/mqtt": "^2.5.0",
     "mqtt": "^3.0.0",
