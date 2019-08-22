@@ -26,17 +26,18 @@ const BrusGuiAsASingleFunction = () => {
   const [brusSuccess] = useMqttTopic(mqttServer, "notification/brus_success");
   const [brusError] = useMqttTopic(mqttServer, "notification/brus_error");
 
-  const noSleep = useRef<any>(() => new NoSleep());
+  const noSleep = useRef<any>();
   useEffect(() => {
+    noSleep.current = new NoSleep();
     document.addEventListener(
       "click",
       function enableNoSleep() {
         document.removeEventListener("click", enableNoSleep, false);
-        noSleep.current().enable();
+        noSleep.current.enable();
       },
       false
     );
-  }, []);
+  }, [noSleep]);
 
   useEffect(() => {
     sendShoppingCart(
