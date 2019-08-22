@@ -1,6 +1,5 @@
 import React, { useReducer, useRef, useState, useEffect } from "react";
 import mqtt, { MqttClient } from "mqtt";
-import NoSleep from "nosleep.js";
 import { useRouter } from "next/router";
 import Head from "next/head";
 
@@ -25,18 +24,6 @@ const BrusGuiAsASingleFunction = () => {
   const [, sendShoppingCart] = useMqttTopic(mqttServer, "fridge/shopping_cart");
   const [brusSuccess] = useMqttTopic(mqttServer, "notification/brus_success");
   const [brusError] = useMqttTopic(mqttServer, "notification/brus_error");
-
-  const noSleep = useRef<any>(() => new NoSleep());
-  useEffect(() => {
-    document.addEventListener(
-      "click",
-      function enableNoSleep() {
-        document.removeEventListener("click", enableNoSleep, false);
-        noSleep.current().enable();
-      },
-      false
-    );
-  }, []);
 
   useEffect(() => {
     sendShoppingCart(
