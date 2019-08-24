@@ -7,12 +7,13 @@ type Choice = {
   title: string;
   value: string;
 };
+
 const choices: Choice[] = [
   { title: "Dahls flaske", value: "beer_dahls_bottle" },
   { title: "Boksbrus", value: "soda_can" },
   { title: "Brus", value: "soda_bottle" }
 ];
-//
+
 // one component does all the things!
 const BrusGuiAsASingleFunction = () => {
   const router = useRouter();
@@ -25,42 +26,51 @@ const BrusGuiAsASingleFunction = () => {
   const [brusSuccess] = useMqttTopic(mqttServer, "notification/brus_success");
   const [brusError] = useMqttTopic(mqttServer, "notification/brus_error");
 
-  useEffect(() => {
-    sendShoppingCart(
-      JSON.stringify(
-        data
-          .filter(([, count]) => count)
-          .map(([choice, count]) => ({ product_name: choice.value, count }))
-      )
-    );
-  }, [data]);
+  useEffect(
+    () => {
+      sendShoppingCart(
+        JSON.stringify(
+          data
+            .filter(([, count]) => count)
+            .map(([choice, count]) => ({ product_name: choice.value, count }))
+        )
+      );
+    },
+    [data]
+  );
 
   const [lastMsgObj, setLastMessage] = useState<[string, any] | null>(null);
 
-  useEffect(() => {
-    if (!brusSuccess.length) return;
-    setData(choices.map((value: Choice) => [value, 0]));
-    setLastMessage(old => {
-      // @ts-ignore
-      if (old) clearTimeout(old.timeoutId);
-      return [
-        brusSuccess[brusSuccess.length - 1] as string,
-        setTimeout(() => setLastMessage(null), 4000)
-      ];
-    });
-  }, [brusSuccess]);
+  useEffect(
+    () => {
+      if (!brusSuccess.length) return;
+      setData(choices.map((value: Choice) => [value, 0]));
+      setLastMessage(old => {
+        // @ts-ignore
+        if (old) clearTimeout(old.timeoutId);
+        return [
+          brusSuccess[brusSuccess.length - 1] as string,
+          setTimeout(() => setLastMessage(null), 4000)
+        ];
+      });
+    },
+    [brusSuccess]
+  );
 
-  useEffect(() => {
-    if (!brusError.length) return;
-    setLastMessage(old => {
-      // @ts-ignore
-      if (old) clearTimeout(old.timeoutId);
-      return [
-        ("Error:" + brusError[brusError.length - 1]) as string,
-        setTimeout(() => setLastMessage(null), 4000)
-      ];
-    });
-  }, [brusError]);
+  useEffect(
+    () => {
+      if (!brusError.length) return;
+      setLastMessage(old => {
+        // @ts-ignore
+        if (old) clearTimeout(old.timeoutId);
+        return [
+          ("Error:" + brusError[brusError.length - 1]) as string,
+          setTimeout(() => setLastMessage(null), 4000)
+        ];
+      });
+    },
+    [brusError]
+  );
 
   return (
     <>
@@ -73,41 +83,59 @@ const BrusGuiAsASingleFunction = () => {
         button {
           font-size: 60px;
         }
+        h1 {
+          text-align: center;
+          margin: 0;
+        }
+        button {
+          width: 100px;
+          height: 100px;
+          margin: 10px;
+        }
+        table {
+          width: 100%;
+        }
       `}</style>
-      <div> Handleliste </div>
-      {lastMsgObj
-        ? lastMsgObj[0]
-        : data.map(([choice, count]) => (
-            <div key={choice.value}>
-              {" "}
-              {count}
-              <button
-                onClick={() => {
-                  setData(data =>
-                    data.map(([c, count]) =>
-                      c === choice ? [c, count + 1] : [c, count]
-                    )
-                  );
-                }}
-              >
-                {" "}
-                +
-              </button>
-              <button
-                onClick={() => {
-                  setData(data =>
-                    data.map(([c, count]) =>
-                      c === choice ? [c, (count || 1) - 1] : [c, count]
-                    )
-                  );
-                }}
-              >
-                {" "}
-                -{" "}
-              </button>
-              {choice.title}
-            </div>
-          ))}
+      <h1> Meny </h1>
+      <hr />
+      <table>
+        {lastMsgObj
+          ? lastMsgObj[0]
+          : data.map(([choice, count]) => (
+              <tr key={choice.value}>
+                <td>{choice.title}</td>
+                <td>{count}</td>
+                <td>
+                  <button
+                    onClick={() => {
+                      setData(data =>
+                        data.map(
+                          ([c, count]) =>
+                            c === choice ? [c, (count || 1) - 1] : [c, count]
+                        )
+                      );
+                    }}
+                  >
+                    {" "}
+                    -{" "}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setData(data =>
+                        data.map(
+                          ([c, count]) =>
+                            c === choice ? [c, count + 1] : [c, count]
+                        )
+                      );
+                    }}
+                  >
+                    {" "}
+                    +
+                  </button>
+                </td>
+              </tr>
+            ))}
+      </table>
     </>
   );
 };
