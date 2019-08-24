@@ -83,10 +83,6 @@ const BrusGuiAsASingleFunction = () => {
         button {
           font-size: 60px;
         }
-        h1 {
-          text-align: center;
-          margin: 0;
-        }
         button {
           width: 100px;
           height: 100px;
@@ -96,8 +92,6 @@ const BrusGuiAsASingleFunction = () => {
           width: 100%;
         }
       `}</style>
-      <h1> Meny </h1>
-      <hr />
       <table>
         {lastMsgObj
           ? lastMsgObj[0]
@@ -116,8 +110,7 @@ const BrusGuiAsASingleFunction = () => {
                       );
                     }}
                   >
-                    {" "}
-                    -{" "}
+                    -
                   </button>
                   <button
                     onClick={() => {
@@ -129,7 +122,6 @@ const BrusGuiAsASingleFunction = () => {
                       );
                     }}
                   >
-                    {" "}
                     +
                   </button>
                 </td>
