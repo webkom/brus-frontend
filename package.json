@@ -5,8 +5,8 @@
   "author": "Odin Ugedal",
   "license": "MIT",
   "scripts": {
-      "now-build": "yarn && sed -i 1,2d node_modules/mqtt/mqtt.js && sed -i 1,2d node_modules/mqtt/bin/pub.js&& sed -i 1,2d node_modules/mqtt/bin/sub.js&& next build",
-      "build": "yarn && sed -i 1,2d node_modules/mqtt/mqtt.js && sed -i 1,2d node_modules/mqtt/bin/pub.js&& sed -i 1,2d node_modules/mqtt/bin/sub.js&& next build"
+    "now-build": "yarn && sed -i 1,2d node_modules/mqtt/mqtt.js && sed -i 1,2d node_modules/mqtt/bin/pub.js&& sed -i 1,2d node_modules/mqtt/bin/sub.js&& next build",
+    "build": "yarn && sed -i 1,2d node_modules/mqtt/mqtt.js && sed -i 1,2d node_modules/mqtt/bin/pub.js&& sed -i 1,2d node_modules/mqtt/bin/sub.js&& next build"
   },
   "dependencies": {
     "@types/mqtt": "^2.5.0",
@@ -18,6 +18,7 @@
   "devDependencies": {
     "@types/node": "^12.7.2",
     "@types/react": "^16.9.2",
+    "prettier": "^1.18.2",
     "typescript": "^3.5.3"
   }
 }

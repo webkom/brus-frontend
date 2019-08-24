@@ -1,4 +1,10 @@
-import React, { useReducer, useRef, useState, useEffect } from "react";
+import React, {
+  useReducer,
+  useRef,
+  useState,
+  useEffect,
+  useCallback
+} from "react";
 import mqtt, { MqttClient } from "mqtt";
 import { useRouter } from "next/router";
 import Head from "next/head";
@@ -22,12 +28,35 @@ const BrusGuiAsASingleFunction = () => {
   const [data, setData] = useState<[Choice, number][]>(() =>
     choices.map((value: Choice) => [value, 0])
   );
-  const [, sendShoppingCart] = useMqttTopic(mqttServer, "fridge/shopping_cart");
+  const [shoppingCartMqtt, sendShoppingCart] = useMqttTopic(
+    mqttServer,
+    "fridge/shopping_cart"
+  );
   const [brusSuccess] = useMqttTopic(mqttServer, "notification/brus_success");
   const [brusError] = useMqttTopic(mqttServer, "notification/brus_error");
 
-  useEffect(
-    () => {
+  useEffect(() => {
+    const lastObj =
+      shoppingCartMqtt.length && shoppingCartMqtt[shoppingCartMqtt.length - 1];
+    if (!lastObj) return;
+
+    // @ts-ignore
+    setData(data =>
+      data.map(([choice]) => {
+        return [
+          choice,
+          (
+            JSON.parse(lastObj).find(o => o.product_name === choice.value) || {
+              count: 0
+            }
+          ).count
+        ];
+      })
+    );
+  }, [shoppingCartMqtt]);
+
+  const sendData = useCallback(
+    data => {
       sendShoppingCart(
         JSON.stringify(
           data
@@ -35,42 +64,37 @@ const BrusGuiAsASingleFunction = () => {
             .map(([choice, count]) => ({ product_name: choice.value, count }))
         )
       );
+      return data;
     },
-    [data]
+    [sendShoppingCart]
   );
 
   const [lastMsgObj, setLastMessage] = useState<[string, any] | null>(null);
 
-  useEffect(
-    () => {
-      if (!brusSuccess.length) return;
-      setData(choices.map((value: Choice) => [value, 0]));
-      setLastMessage(old => {
-        // @ts-ignore
-        if (old) clearTimeout(old.timeoutId);
-        return [
-          brusSuccess[brusSuccess.length - 1] as string,
-          setTimeout(() => setLastMessage(null), 4000)
-        ];
-      });
-    },
-    [brusSuccess]
-  );
+  useEffect(() => {
+    if (!brusSuccess.length) return;
+    setData(choices.map((value: Choice) => [value, 0]));
+    setLastMessage(old => {
+      // @ts-ignore
+      if (old) clearTimeout(old.timeoutId);
+      return [
+        brusSuccess[brusSuccess.length - 1] as string,
+        setTimeout(() => setLastMessage(null), 4000)
+      ];
+    });
+  }, [brusSuccess]);
 
-  useEffect(
-    () => {
-      if (!brusError.length) return;
-      setLastMessage(old => {
-        // @ts-ignore
-        if (old) clearTimeout(old.timeoutId);
-        return [
-          ("Error:" + brusError[brusError.length - 1]) as string,
-          setTimeout(() => setLastMessage(null), 4000)
-        ];
-      });
-    },
-    [brusError]
-  );
+  useEffect(() => {
+    if (!brusError.length) return;
+    setLastMessage(old => {
+      // @ts-ignore
+      if (old) clearTimeout(old.timeoutId);
+      return [
+        ("Error:" + brusError[brusError.length - 1]) as string,
+        setTimeout(() => setLastMessage(null), 4000)
+      ];
+    });
+  }, [brusError]);
 
   return (
     <>
@@ -103,9 +127,10 @@ const BrusGuiAsASingleFunction = () => {
                   <button
                     onClick={() => {
                       setData(data =>
-                        data.map(
-                          ([c, count]) =>
+                        sendData(
+                          data.map(([c, count]) =>
                             c === choice ? [c, (count || 1) - 1] : [c, count]
+                          )
                         )
                       );
                     }}
@@ -115,9 +140,10 @@ const BrusGuiAsASingleFunction = () => {
                   <button
                     onClick={() => {
                       setData(data =>
-                        data.map(
-                          ([c, count]) =>
+                        sendData(
+                          data.map(([c, count]) =>
                             c === choice ? [c, count + 1] : [c, count]
+                          )
                         )
                       );
                     }}
