@@ -86,6 +86,7 @@ const BrusGuiAsASingleFunction = () => {
 
   useEffect(() => {
     if (!brusError.length) return;
+    setData(choices.map((value: Choice) => [value, 0]));
     setLastMessage(old => {
       // @ts-ignore
       if (old) clearTimeout(old.timeoutId);
@@ -95,6 +96,8 @@ const BrusGuiAsASingleFunction = () => {
       ];
     });
   }, [brusError]);
+
+  if (!mqttServer) return <h1> U drunk.</h1>;
 
   return (
     <>
@@ -192,7 +195,8 @@ const useMqttTopic = (
   });
 
   const sendMessage = (message: string) => {
-    if (client.current) client.current.publish(topic, message);
+    if (client.current)
+      client.current.publish(topic, message, { qos: 1, retain: true });
   };
 
   return [messages, sendMessage];
