@@ -4582,6 +4582,11 @@ tslib@^1.9.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.10.0.tgz#c3c19f95973fb0a62973fb09d90d961ee43e5c8a"
   integrity sha512-qOebF53frne81cf0S9B41ByenJ3/IuH8yJKngAX35CmiZySA0khhkovshKK+jGCaMnVomla7gVlIcc3EvKPbTQ==
 
+tts-js@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/tts-js/-/tts-js-1.0.1.tgz#ce141390a9c4bc47dce50c3a6d120ac3deda67f7"
+  integrity sha1-zhQTkKnEvEfc5Qw6bRIKw97aZ/c=
+
 tty-aware-progress@1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/tty-aware-progress/-/tty-aware-progress-1.0.4.tgz#63564adf7f76a8ec1169f2ae52eaad8129031000"

@@ -9,6 +9,9 @@ import mqtt, { MqttClient } from "mqtt";
 import { useRouter } from "next/router";
 import Head from "next/head";
 
+//@ts-ignore
+const tts = process.browser ? require("tts-js").default : null;
+
 type Choice = {
   title: string;
   value: string;
@@ -24,6 +27,12 @@ const choices: Choice[] = [
 const BrusGuiAsASingleFunction = () => {
   const router = useRouter();
   // use mqttServer query to set mqtt url
+  //
+  useEffect(() => {
+    setTimeout(() => {
+      console.log(window.speechSynthesis.getVoices());
+    }, 2000);
+  });
   const mqttServer = router.query.mqttServer as string;
   const [data, setData] = useState<[Choice, number][]>(() =>
     choices.map((value: Choice) => [value, 0])
@@ -90,6 +99,16 @@ const BrusGuiAsASingleFunction = () => {
     setLastMessage(old => {
       // @ts-ignore
       if (old) clearTimeout(old.timeoutId);
+      try {
+        tts &&
+          // @ts-ignore
+          tts.speak(brusError[brusError.length - 1], {
+            lang: "nb-NO",
+            pitch: 1,
+            rate: 1
+          });
+      } catch (e) {}
+
       return [
         ("Error:" + brusError[brusError.length - 1]) as string,
         setTimeout(() => setLastMessage(null), 4000)
