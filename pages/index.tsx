@@ -73,7 +73,7 @@ const BrusGuiAsASingleFunction = () => {
 
   useEffect(() => {
     if (!brusSuccess.length) return;
-    setData(choices.map((value: Choice) => [value, 0]));
+    setData(sendData(choices.map((value: Choice) => [value, 0])));
     setLastMessage(old => {
       // @ts-ignore
       if (old) clearTimeout(old.timeoutId);
@@ -86,7 +86,7 @@ const BrusGuiAsASingleFunction = () => {
 
   useEffect(() => {
     if (!brusError.length) return;
-    setData(choices.map((value: Choice) => [value, 0]));
+    setData(sendData(choices.map((value: Choice) => [value, 0])));
     setLastMessage(old => {
       // @ts-ignore
       if (old) clearTimeout(old.timeoutId);
