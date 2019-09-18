@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import mqtt, { MqttClient } from 'mqtt';
+import mqtt, { MqttClient } from 'mqtt/dist/mqtt';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 

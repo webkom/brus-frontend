@@ -5,8 +5,8 @@
   "author": "Odin Ugedal",
   "license": "MIT",
   "scripts": {
-    "now-build": "yarn && sed -i 1,2d node_modules/mqtt/mqtt.js && sed -i 1,2d node_modules/mqtt/bin/pub.js&& sed -i 1,2d node_modules/mqtt/bin/sub.js&& next build",
-    "build": "yarn && sed -i 1,2d node_modules/mqtt/mqtt.js && sed -i 1,2d node_modules/mqtt/bin/pub.js&& sed -i 1,2d node_modules/mqtt/bin/sub.js&& next build"
+    "now-build": "yarn && next build",
+    "build": "yarn && next build"
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
