@@ -90,6 +90,10 @@ const BrusGuiAsASingleFunction = () => {
     },
     [cart]
   );
+  const resetCart = useCallback(() => {
+    setCart({});
+    sendMessage('fridge/shopping_cart', '[]');
+  }, []);
 
   // MQTT subscriptions and message handlers
   const subscriptions = [
@@ -97,7 +101,7 @@ const BrusGuiAsASingleFunction = () => {
       topic: 'notification/brus_success',
       handler: useCallback(msg => {
         setSuccess(msg);
-        setCart({});
+        resetCart();
         setTimeout(() => setSuccess(''), 4000);
       }, [])
     },
