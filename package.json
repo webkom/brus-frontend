@@ -12,7 +12,9 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
+    "@types/isomorphic-fetch": "^0.0.35",
     "@types/mqtt": "^2.5.0",
+    "isomorphic-fetch": "^2.2.1",
     "mqtt": "^3.0.0",
     "next": "^9.0.3",
     "react": "^16.9.0",

@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import mqtt, { MqttClient } from 'mqtt/dist/mqtt';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import 'isomorphic-fetch';
 
 const Product: React.FC<{
   product: Product;
