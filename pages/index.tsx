@@ -42,12 +42,6 @@ const getProducts = async () => {
   const res = await fetch('https://brus.abakus.no/api/liste/products/');
   const products: Product[] = await res.json();
   return products;
-  // const products: Product[] = [
-  //   { title: 'Dahls flaske', value: 'beer_dahls_bottle', price: 0 },
-  //   { title: 'Boksbrus', value: 'soda_can', price: 0 },
-  //   { title: 'Brus', value: 'soda_bottle', price: 0 }
-  // ];
-  // return products;
 };
 
 // one component does all the things!
@@ -190,8 +184,8 @@ const BrusGuiAsASingleFunction = () => {
           width: 100%;
         }
       `}</style>
-      {error && <>{error}</>}
-      {success && <>{success}</>}
+      {error}
+      {success}
       {!error && !success && (
         <table>
           <tbody>
