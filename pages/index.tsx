@@ -97,6 +97,7 @@ const BrusGuiAsASingleFunction = () => {
       topic: 'notification/brus_success',
       handler: useCallback(msg => {
         setSuccess(msg);
+        setCart({});
         setTimeout(() => setSuccess(''), 4000);
       }, [])
     },
@@ -161,6 +162,7 @@ const BrusGuiAsASingleFunction = () => {
       <style global jsx>{`
         html,
         button {
+          font-family: 'Open Sans', sans-serif;
           font-size: 60px;
         }
         .price {
