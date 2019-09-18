@@ -1,120 +1,159 @@
-import React, {
-  useReducer,
-  useRef,
-  useState,
-  useEffect,
-  useCallback
-} from "react";
-import mqtt, { MqttClient } from "mqtt";
-import { useRouter } from "next/router";
-import Head from "next/head";
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import mqtt, { MqttClient } from 'mqtt';
+import { useRouter } from 'next/router';
+import Head from 'next/head';
 
-//@ts-ignore
-const tts = process.browser ? require("tts-js").default : null;
-
-type Choice = {
-  title: string;
-  value: string;
+const Product: React.FC<{
+  product: Product;
+  count: number;
+  setCount: (count: number) => void;
+}> = ({ product, count, setCount }) => {
+  return (
+    <tr>
+      <td>
+        {product.name}
+        <div className="price">{product.current_price},-</div>
+      </td>
+      <td>{count}</td>
+      <td className="buttons">
+        <button onClick={() => setCount(Math.max(count - 1, 0))}>-</button>
+        <button onClick={() => setCount(count + 1)}>+</button>
+      </td>
+    </tr>
+  );
 };
 
-const choices: Choice[] = [
-  { title: "Dahls flaske", value: "beer_dahls_bottle" },
-  { title: "Boksbrus", value: "soda_can" },
-  { title: "Brus", value: "soda_bottle" }
-];
+type Cart = {
+  [key: string]: number;
+};
+
+type Product = {
+  key: string;
+  name: string;
+  current_price: number;
+};
+
+type ShoppingCartUpdate = {
+  product_name: string;
+  count: number;
+};
+
+const getProducts = async () => {
+  const res = await fetch('https://brus.abakus.no/api/liste/products/');
+  const products: Product[] = await res.json();
+  return products;
+  // const products: Product[] = [
+  //   { title: 'Dahls flaske', value: 'beer_dahls_bottle', price: 0 },
+  //   { title: 'Boksbrus', value: 'soda_can', price: 0 },
+  //   { title: 'Brus', value: 'soda_bottle', price: 0 }
+  // ];
+  // return products;
+};
 
 // one component does all the things!
 const BrusGuiAsASingleFunction = () => {
   const router = useRouter();
-  // use mqttServer query to set mqtt url
-  //
-  useEffect(() => {
-    setTimeout(() => {
-      console.log(window.speechSynthesis.getVoices());
-    }, 2000);
-  });
   const mqttServer = router.query.mqttServer as string;
-  const [data, setData] = useState<[Choice, number][]>(() =>
-    choices.map((value: Choice) => [value, 0])
-  );
-  const [shoppingCartMqtt, sendShoppingCart] = useMqttTopic(
-    mqttServer,
-    "fridge/shopping_cart"
-  );
-  const [brusSuccess] = useMqttTopic(mqttServer, "notification/brus_success");
-  const [brusError] = useMqttTopic(mqttServer, "notification/brus_error");
 
+  const client = useRef<MqttClient>();
+  const sendMessage = useCallback(
+    (topic, message) => {
+      client.current.publish(topic, message, { qos: 1, retain: true });
+    },
+    [client.current]
+  );
+
+  const [products, setProducts] = useState<Product[]>([]);
+  // Fetch products from brus API
   useEffect(() => {
-    const lastObj =
-      shoppingCartMqtt.length && shoppingCartMqtt[shoppingCartMqtt.length - 1];
-    if (!lastObj) return;
+    (async () => {
+      const products = await getProducts();
+      setProducts(products);
+    })();
+  }, []);
 
-    // @ts-ignore
-    setData(data =>
-      data.map(([choice]) => {
-        return [
-          choice,
-          (
-            JSON.parse(lastObj).find(o => o.product_name === choice.value) || {
-              count: 0
-            }
-          ).count
-        ];
-      })
-    );
-  }, [shoppingCartMqtt]);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const sendData = useCallback(
-    data => {
-      sendShoppingCart(
+  const [cart, setCart] = useState<Cart>({});
+  // Change cart and publish to MQTT
+  const changeCart = useCallback(
+    async (key: string, count: number) => {
+      const newCart = {
+        ...cart,
+        [key]: count
+      };
+      sendMessage(
+        'fridge/shopping_cart',
         JSON.stringify(
-          data
+          Object.entries(newCart)
             .filter(([, count]) => count)
-            .map(([choice, count]) => ({ product_name: choice.value, count }))
+            .map(([key, count]) => ({ product_name: key, count }))
         )
       );
-      return data;
+      setCart(newCart);
     },
-    [sendShoppingCart]
+    [cart]
   );
 
-  const [lastMsgObj, setLastMessage] = useState<[string, any] | null>(null);
-
+  // MQTT subscriptions and message handlers
+  const subscriptions = [
+    {
+      topic: 'notification/brus_success',
+      handler: useCallback(msg => {
+        setSuccess(msg);
+        setTimeout(() => setSuccess(''), 4000);
+      }, [])
+    },
+    {
+      topic: 'notification/brus_error',
+      handler: useCallback(msg => {
+        setError(msg);
+        setTimeout(() => setError(''), 4000);
+      }, [])
+    },
+    {
+      topic: 'fridge/shopping_cart',
+      handler: (msg: string) => {
+        const updates: ShoppingCartUpdate[] = JSON.parse(msg);
+        setCart(
+          updates.reduce((obj, val) => {
+            return {
+              ...obj,
+              [val.product_name]: val.count
+            };
+          }, {})
+        );
+      }
+    }
+  ];
+  // Set up MQTT connection
   useEffect(() => {
-    if (!brusSuccess.length) return;
-    setData(sendData(choices.map((value: Choice) => [value, 0])));
-    setLastMessage(old => {
-      // @ts-ignore
-      if (old) clearTimeout(old.timeoutId);
-      return [
-        brusSuccess[brusSuccess.length - 1] as string,
-        setTimeout(() => setLastMessage(null), 4000)
-      ];
-    });
-  }, [brusSuccess]);
+    if (client.current) {
+      return;
+    }
+    client.current = mqtt.connect(mqttServer);
+    client.current.on('connect', () => {
+      console.log(`Connected to ${mqttServer}`);
 
-  useEffect(() => {
-    if (!brusError.length) return;
-    setData(sendData(choices.map((value: Choice) => [value, 0])));
-    setLastMessage(old => {
-      // @ts-ignore
-      if (old) clearTimeout(old.timeoutId);
-      try {
-        tts &&
-          // @ts-ignore
-          tts.speak(brusError[brusError.length - 1], {
-            lang: "nb-NO",
-            pitch: 1,
-            rate: 1
-          });
-      } catch (e) {}
+      subscriptions.forEach(({ topic, handler }) => {
+        client.current.subscribe(topic, (err: any) => {
+          if (err) return console.error(err);
+          console.log(`Subscribed to topic: "${topic}"`);
+        });
+        client.current.on('message', (_topic: string, rawMessage: Buffer) => {
+          if (_topic === topic) {
+            const message = rawMessage.toString();
+            handler(message);
+          }
+        });
+      });
 
-      return [
-        ("Error:" + brusError[brusError.length - 1]) as string,
-        setTimeout(() => setLastMessage(null), 4000)
-      ];
+      return () => {
+        client.current.end();
+      };
     });
-  }, [brusError]);
+  });
 
   if (!mqttServer) return <h1> U drunk.</h1>;
 
@@ -129,96 +168,48 @@ const BrusGuiAsASingleFunction = () => {
         button {
           font-size: 60px;
         }
+        .price {
+          font-size: 30px;
+        }
+        td {
+          border-bottom: 1px solid black;
+          border-top: 1px solid black;
+          margin: 0;
+          padding: 20px 0;
+        }
+        td.buttons {
+          white-space: nowrap;
+        }
         button {
           width: 100px;
           height: 100px;
           margin: 10px;
         }
         table {
+          border-collapse: collapse;
           width: 100%;
         }
       `}</style>
-      <table>
-        {lastMsgObj
-          ? lastMsgObj[0]
-          : data.map(([choice, count]) => (
-              <tr key={choice.value}>
-                <td>{choice.title}</td>
-                <td>{count}</td>
-                <td>
-                  <button
-                    onClick={() => {
-                      setData(data =>
-                        sendData(
-                          data.map(([c, count]) =>
-                            c === choice ? [c, (count || 1) - 1] : [c, count]
-                          )
-                        )
-                      );
-                    }}
-                  >
-                    -
-                  </button>
-                  <button
-                    onClick={() => {
-                      setData(data =>
-                        sendData(
-                          data.map(([c, count]) =>
-                            c === choice ? [c, count + 1] : [c, count]
-                          )
-                        )
-                      );
-                    }}
-                  >
-                    +
-                  </button>
-                </td>
-              </tr>
+      {error && <>{error}</>}
+      {success && <>{success}</>}
+      {!error && !success && (
+        <table>
+          <tbody>
+            {products.map(product => (
+              <Product
+                key={product.key}
+                product={product}
+                count={cart[product.key] || 0}
+                setCount={(count: number) => changeCart(product.key, count)}
+              />
             ))}
-      </table>
+          </tbody>
+        </table>
+      )}
     </>
   );
 };
 
 BrusGuiAsASingleFunction.getInitialProps = async () => ({});
-
-const reducer = (messages: string[], newMessage: string) => [
-  ...messages,
-  newMessage
-];
-
-const useMqttTopic = (
-  url: string,
-  topic: string
-): [string[], (payload: string) => void] => {
-  const client = useRef<MqttClient | null>(null);
-  const [messages, addMessage] = useReducer(reducer, []);
-
-  useEffect(() => {
-    if (client.current) {
-      return;
-    }
-    client.current = mqtt.connect(url);
-    client.current.on("connect", () => {
-      console.log(`Connected to ${url}`);
-      client.current.subscribe(topic, (err: any) => {
-        if (err) return console.error(err);
-        console.log(`Subscribed to bard: "${topic}"`);
-      });
-    });
-
-    client.current.on("message", (_topic: string, rawMessage: Buffer) => {
-      const message = rawMessage.toString();
-      addMessage(message);
-    });
-  });
-
-  const sendMessage = (message: string) => {
-    if (client.current)
-      client.current.publish(topic, message, { qos: 1, retain: true });
-  };
-
-  return [messages, sendMessage];
-};
 
 export default BrusGuiAsASingleFunction;
