@@ -5,8 +5,10 @@
   "author": "Odin Ugedal",
   "license": "MIT",
   "scripts": {
-    "now-build": "yarn && next build",
-    "build": "yarn && next build"
+    "now-build": "yarn && yarn build",
+    "build": "next build",
+    "dev": "next dev",
+    "start": "next start"
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
