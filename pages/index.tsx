@@ -18,7 +18,7 @@ const Product: React.FC<{
       <td>{count}</td>
       <td className="buttons">
         <button onClick={() => setCount(Math.max(count - 1, 0))}>-</button>
-        <button onClick={() => setCount(count + 1)}>+</button>
+        <button onClick={() => setCount(count < 10 ? count + 1 : 10)}>+</button>
       </td>
     </tr>
   );
