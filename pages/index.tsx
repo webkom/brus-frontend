@@ -18,7 +18,7 @@ const Product: React.FC<{
       <td>{count}</td>
       <td className="buttons">
         <button onClick={() => setCount(Math.max(count - 1, 0))}>-</button>
-        <button onClick={() => setCount(count < 10 ? count + 1 : 10)}>+</button>
+        <button onClick={() => setCount(count < 30 ? count + 1 : 30)}>+</button>
       </td>
     </tr>
   );
@@ -39,6 +39,12 @@ type ShoppingCartUpdate = {
   count: number;
 };
 
+type Person = {
+  avatar: string;
+  uids: Array<string>;
+  name: string;
+};
+
 const getProducts = async () => {
   const res = await fetch('https://brus.abakus.no/api/liste/products/');
   const products: Product[] = await res.json();
@@ -49,11 +55,20 @@ const getProducts = async () => {
 const BrusGuiAsASingleFunction = () => {
   const router = useRouter();
   const mqttServer = router.query.mqttServer as string;
+  const onlyShow = ((router.query.onlyShow as string) || '')
+    .split(',')
+    .filter(Boolean);
+  const folks = JSON.parse(
+    Buffer.from((router.query.folks as string) || 'W10K', 'base64').toString()
+  ) as Array<Person>;
+
+  const [selectedFolks, setSelectedFolks] = useState<Array<Person>>([]);
 
   const client = useRef<MqttClient>();
   const sendMessage = useCallback(
-    (topic, message) => {
-      client.current.publish(topic, message, { qos: 1, retain: true });
+    (topic, message, retain = false) => {
+      console.log('Sending msg on topic', topic, message);
+      client.current.publish(topic, message, { qos: 1, retain });
     },
     [client.current]
   );
@@ -63,12 +78,12 @@ const BrusGuiAsASingleFunction = () => {
   useEffect(() => {
     (async () => {
       const products = await getProducts();
-      setProducts(products);
+      setProducts(products.reverse());
     })();
   }, []);
 
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState<Array<String>>([]);
+  const [success, setSuccess] = useState<Array<String>>([]);
 
   const [cart, setCart] = useState<Cart>({});
   // Change cart and publish to MQTT
@@ -92,7 +107,7 @@ const BrusGuiAsASingleFunction = () => {
   );
   const resetCart = useCallback(() => {
     setCart({});
-    sendMessage('fridge/shopping_cart', '[]');
+    sendMessage('fridge/shopping_cart', '[]', true);
   }, []);
 
   // MQTT subscriptions and message handlers
@@ -100,16 +115,22 @@ const BrusGuiAsASingleFunction = () => {
     {
       topic: 'notification/brus_success',
       handler: useCallback(msg => {
-        setSuccess(msg);
-        resetCart();
-        setTimeout(() => setSuccess(''), 4000);
+        setSuccess(old => old.filter(item => !(item === msg)).concat(msg));
+        console.log('Got msg', msg);
+        setTimeout(
+          () => setSuccess(old => old.filter(item => !(item === msg))),
+          4000
+        );
       }, [])
     },
     {
       topic: 'notification/brus_error',
       handler: useCallback(msg => {
-        setError(msg);
-        setTimeout(() => setError(''), 4000);
+        setError(old => old.filter(item => !(item === msg)).concat(msg));
+        setTimeout(
+          () => setError(old => old.filter(item => !(item === msg))),
+          4000
+        );
       }, [])
     },
     {
@@ -167,10 +188,14 @@ const BrusGuiAsASingleFunction = () => {
         html,
         button {
           font-family: 'Open Sans', sans-serif;
-          font-size: 60px;
+          font-size: 40px;
+        }
+        img {
+          width: 60px;
+          padding: 10px;
         }
         .price {
-          font-size: 30px;
+          font-size: 25px;
         }
         td {
           border-bottom: 1px solid black;
@@ -191,19 +216,149 @@ const BrusGuiAsASingleFunction = () => {
           width: 100%;
         }
       `}</style>
-      {error}
-      {success}
-      {!error && !success && (
+      {error.map(err => (
+        <div>Bad: {err}</div>
+      ))}
+      {success.map(success => (
+        <div>Good: {success}</div>
+      ))}
+      {!error.length && !success.length && (
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center'
+          }}
+        >
+          {' '}
+          {folks.map(per => {
+            const isSelected = selectedFolks.find(it => per.name === it.name);
+            return (
+              <img
+                style={{ opacity: isSelected ? 1 : 0.4 }}
+                onClick={() => {
+                  setSelectedFolks(
+                    isSelected
+                      ? selectedFolks.filter(it => !(it.name === per.name))
+                      : selectedFolks.concat([per])
+                  );
+                }}
+                src={per.avatar}
+              />
+            );
+          })}
+        </div>
+      )}
+      {!error.length && !success.length && (
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center'
+          }}
+        >
+          <button
+            disabled={selectedFolks.length !== 1}
+            style={{ opacity: selectedFolks.length === 1 ? 1 : 0.4 }}
+            onClick={() => {
+              sendMessage(
+                'kaffe_register/read_card',
+                JSON.stringify({ uid: selectedFolks[0].uids[0] })
+              );
+
+              sendMessage(
+                'notification/brus_success',
+                `${selectedFolks[0].name} lager kaffe!!☕☕`
+              );
+              setSelectedFolks([]);
+            }}
+          >
+            ☕
+          </button>
+          <button
+            disabled={
+              selectedFolks.length === 0 || Object.keys(cart).length === 0
+            }
+            style={{
+              opacity:
+                selectedFolks.length === 0 || Object.keys(cart).length === 0
+                  ? 0.4
+                  : 1
+            }}
+            onClick={() => {
+              const savedCart = cart;
+              selectedFolks.forEach(person => {
+                sendMessage(
+                  'brus_register/read_card',
+                  JSON.stringify({
+                    datetime: new Date(),
+                    shopping_cart: JSON.stringify(
+                      Object.entries(savedCart)
+                        .filter(([, count]) => count)
+                        .map(([key, count]) => ({ product_name: key, count }))
+                    ),
+                    uid: person.uids[0]
+                  })
+                );
+              });
+              resetCart();
+              setSelectedFolks([]);
+            }}
+          >
+            💶
+          </button>
+          <button
+            disabled={
+              selectedFolks.length !== 1 || Object.keys(cart).length === 0
+            }
+            style={{
+              opacity:
+                selectedFolks.length !== 1 || Object.keys(cart).length === 0
+                  ? 0.4
+                  : 1
+            }}
+            onClick={() => {
+              const savedCart = cart;
+              selectedFolks.forEach(person => {
+                sendMessage(
+                  'brus_register/read_card',
+                  JSON.stringify({
+                    datetime: new Date(),
+                    shopping_cart: JSON.stringify(
+                      Object.entries(savedCart)
+                        .filter(([, count]) => count)
+                        .map(([key, count]) => ({
+                          product_name: key,
+                          count: -count
+                        }))
+                    ),
+                    uid: person.uids[0]
+                  })
+                );
+              });
+              resetCart();
+              setSelectedFolks([]);
+            }}
+          >
+            📦
+          </button>
+        </div>
+      )}
+      {!error.length && !success.length && (
         <table>
           <tbody>
-            {products.map(product => (
-              <Product
-                key={product.key}
-                product={product}
-                count={cart[product.key] || 0}
-                setCount={(count: number) => changeCart(product.key, count)}
-              />
-            ))}
+            {products
+              .filter(product =>
+                onlyShow.length > 0 ? onlyShow.includes(product.key) : true
+              )
+              .map(product => (
+                <Product
+                  key={product.key}
+                  product={product}
+                  count={cart[product.key] || 0}
+                  setCount={(count: number) => changeCart(product.key, count)}
+                />
+              ))}
           </tbody>
         </table>
       )}
