@@ -55,6 +55,9 @@ const getProducts = async () => {
 const BrusGuiAsASingleFunction = () => {
   const router = useRouter();
   const mqttServer = router.query.mqttServer as string;
+  const onlyShow = ((router.query.onlyShow as string) || '')
+    .split(',')
+    .filter(Boolean);
   const folks = JSON.parse(
     Buffer.from((router.query.folks as string) || 'W10K', 'base64').toString()
   ) as Array<Person>;
@@ -220,7 +223,13 @@ const BrusGuiAsASingleFunction = () => {
         <div>Good: {success}</div>
       ))}
       {!error.length && !success.length && (
-        <div>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center'
+          }}
+        >
           {' '}
           {folks.map(per => {
             const isSelected = selectedFolks.find(it => per.name === it.name);
@@ -241,7 +250,13 @@ const BrusGuiAsASingleFunction = () => {
         </div>
       )}
       {!error.length && !success.length && (
-        <div>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center'
+          }}
+        >
           <button
             disabled={selectedFolks.length !== 1}
             style={{ opacity: selectedFolks.length === 1 ? 1 : 0.4 }}
@@ -325,21 +340,25 @@ const BrusGuiAsASingleFunction = () => {
               setSelectedFolks([]);
             }}
           >
-            🛒
+            📦
           </button>
         </div>
       )}
       {!error.length && !success.length && (
         <table>
           <tbody>
-            {products.map(product => (
-              <Product
-                key={product.key}
-                product={product}
-                count={cart[product.key] || 0}
-                setCount={(count: number) => changeCart(product.key, count)}
-              />
-            ))}
+            {products
+              .filter(product =>
+                onlyShow.length > 0 ? onlyShow.includes(product.key) : true
+              )
+              .map(product => (
+                <Product
+                  key={product.key}
+                  product={product}
+                  count={cart[product.key] || 0}
+                  setCount={(count: number) => changeCart(product.key, count)}
+                />
+              ))}
           </tbody>
         </table>
       )}
