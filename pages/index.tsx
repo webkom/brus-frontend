@@ -63,9 +63,9 @@ const BrusGuiAsASingleFunction = () => {
 
   const client = useRef<MqttClient>();
   const sendMessage = useCallback(
-    (topic, message) => {
+    (topic, message, retain = false) => {
       console.log('Sending msg on topic', topic, message);
-      client.current.publish(topic, message, { qos: 1, retain: true });
+      client.current.publish(topic, message, { qos: 1, retain });
     },
     [client.current]
   );
@@ -75,7 +75,7 @@ const BrusGuiAsASingleFunction = () => {
   useEffect(() => {
     (async () => {
       const products = await getProducts();
-      setProducts(products);
+      setProducts(products.reverse());
     })();
   }, []);
 
@@ -104,7 +104,7 @@ const BrusGuiAsASingleFunction = () => {
   );
   const resetCart = useCallback(() => {
     setCart({});
-    sendMessage('fridge/shopping_cart', '[]');
+    sendMessage('fridge/shopping_cart', '[]', true);
   }, []);
 
   // MQTT subscriptions and message handlers
@@ -112,9 +112,8 @@ const BrusGuiAsASingleFunction = () => {
     {
       topic: 'notification/brus_success',
       handler: useCallback(msg => {
-        setSuccess(old => old.concat(msg));
+        setSuccess(old => old.filter(item => !(item === msg)).concat(msg));
         console.log('Got msg', msg);
-        resetCart();
         setTimeout(
           () => setSuccess(old => old.filter(item => !(item === msg))),
           4000
@@ -124,7 +123,7 @@ const BrusGuiAsASingleFunction = () => {
     {
       topic: 'notification/brus_error',
       handler: useCallback(msg => {
-        setError(old => old.concat(msg));
+        setError(old => old.filter(item => !(item === msg)).concat(msg));
         setTimeout(
           () => setError(old => old.filter(item => !(item === msg))),
           4000
@@ -214,22 +213,12 @@ const BrusGuiAsASingleFunction = () => {
           width: 100%;
         }
       `}</style>
-      {error
-        .filter((item, index) => error.indexOf(item) !== index)
-        .map(err => (
-          <>
-            Bad: {err}
-            <br />
-          </>
-        ))}
-      {success
-        .filter((item, index) => success.indexOf(item) !== index)
-        .map(success => (
-          <>
-            {success}
-            <br />
-          </>
-        ))}
+      {error.map(err => (
+        <div>Bad: {err}</div>
+      ))}
+      {success.map(success => (
+        <div>Good: {success}</div>
+      ))}
       {!error.length && !success.length && (
         <div>
           {' '}
@@ -239,7 +228,6 @@ const BrusGuiAsASingleFunction = () => {
               <img
                 style={{ opacity: isSelected ? 1 : 0.4 }}
                 onClick={() => {
-                  console.log('clicked...', isSelected, selectedFolks);
                   setSelectedFolks(
                     isSelected
                       ? selectedFolks.filter(it => !(it.name === per.name))
@@ -344,7 +332,7 @@ const BrusGuiAsASingleFunction = () => {
       {!error.length && !success.length && (
         <table>
           <tbody>
-            {products.reverse().map(product => (
+            {products.map(product => (
               <Product
                 key={product.key}
                 product={product}
