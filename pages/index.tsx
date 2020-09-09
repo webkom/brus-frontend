@@ -214,18 +214,22 @@ const BrusGuiAsASingleFunction = () => {
           width: 100%;
         }
       `}</style>
-      {error.map(err => (
-        <>
-          {err}
-          <br />
-        </>
-      ))}
-      {success.map(err => (
-        <>
-          {err}
-          <br />
-        </>
-      ))}
+      {error
+        .filter((item, index) => error.indexOf(item) !== index)
+        .map(err => (
+          <>
+            {err}
+            <br />
+          </>
+        ))}
+      {success
+        .filter((item, index) => success.indexOf(item) !== index)
+        .map(err => (
+          <>
+            {err}
+            <br />
+          </>
+        ))}
       {!error.length && !success.length && (
         <div>
           {' '}
@@ -263,19 +267,27 @@ const BrusGuiAsASingleFunction = () => {
             ☕
           </button>
           <button
-            disabled={selectedFolks.length === 0}
+            disabled={
+              selectedFolks.length === 0 || Object.keys(cart).length === 0
+            }
             onClick={() => {
+              const savedCart = cart;
               selectedFolks.forEach(person => {
                 sendMessage(
                   'brus_register/read_card',
                   JSON.stringify({
                     datetime: new Date(),
-                    shopping_cart: cart,
+                    shopping_cart: JSON.stringify(
+                      Object.entries(savedCart)
+                        .filter(([, count]) => count)
+                        .map(([key, count]) => ({ product_name: key, count }))
+                    ),
                     uid: person.uids[0]
                   })
                 );
               });
               resetCart();
+              setSelectedFolks([]);
             }}
           >
             💶
