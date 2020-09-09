@@ -39,6 +39,12 @@ type ShoppingCartUpdate = {
   count: number;
 };
 
+type Person = {
+  avatar: string;
+  uids: Array<string>;
+  name: string;
+};
+
 const getProducts = async () => {
   const res = await fetch('https://brus.abakus.no/api/liste/products/');
   const products: Product[] = await res.json();
@@ -49,10 +55,16 @@ const getProducts = async () => {
 const BrusGuiAsASingleFunction = () => {
   const router = useRouter();
   const mqttServer = router.query.mqttServer as string;
+  const folks = JSON.parse(
+    Buffer.from((router.query.folks as string) || 'W10K', 'base64').toString()
+  ) as Array<Person>;
+
+  const [selectedFolks, setSelectedFolks] = useState<Array<Person>>([]);
 
   const client = useRef<MqttClient>();
   const sendMessage = useCallback(
     (topic, message) => {
+      console.log('Sending msg on topic', topic, message);
       client.current.publish(topic, message, { qos: 1, retain: true });
     },
     [client.current]
@@ -67,8 +79,8 @@ const BrusGuiAsASingleFunction = () => {
     })();
   }, []);
 
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState<Array<String>>([]);
+  const [success, setSuccess] = useState<Array<String>>([]);
 
   const [cart, setCart] = useState<Cart>({});
   // Change cart and publish to MQTT
@@ -100,16 +112,23 @@ const BrusGuiAsASingleFunction = () => {
     {
       topic: 'notification/brus_success',
       handler: useCallback(msg => {
-        setSuccess(msg);
+        setSuccess(old => old.concat(msg));
+        console.log('Got msg', msg);
         resetCart();
-        setTimeout(() => setSuccess(''), 4000);
+        setTimeout(
+          () => setSuccess(old => old.filter(item => !(item === msg))),
+          4000
+        );
       }, [])
     },
     {
       topic: 'notification/brus_error',
       handler: useCallback(msg => {
-        setError(msg);
-        setTimeout(() => setError(''), 4000);
+        setError(old => old.concat(msg));
+        setTimeout(
+          () => setError(old => old.filter(item => !(item === msg))),
+          4000
+        );
       }, [])
     },
     {
@@ -167,10 +186,14 @@ const BrusGuiAsASingleFunction = () => {
         html,
         button {
           font-family: 'Open Sans', sans-serif;
-          font-size: 60px;
+          font-size: 40px;
+        }
+        img {
+          width: 60px;
+          padding: 10px;
         }
         .price {
-          font-size: 30px;
+          font-size: 25px;
         }
         td {
           border-bottom: 1px solid black;
@@ -191,9 +214,75 @@ const BrusGuiAsASingleFunction = () => {
           width: 100%;
         }
       `}</style>
-      {error}
-      {success}
-      {!error && !success && (
+      {error.map(err => (
+        <>
+          {err}
+          <br />
+        </>
+      ))}
+      {success.map(err => (
+        <>
+          {err}
+          <br />
+        </>
+      ))}
+      {!error.length && !success.length && (
+        <div>
+          {' '}
+          {folks.map(per => {
+            const isSelected = selectedFolks.find(it => per.name === it.name);
+            return (
+              <img
+                style={{ opacity: isSelected ? 1 : 0.4 }}
+                onClick={() => {
+                  console.log('clicked...', isSelected, selectedFolks);
+                  setSelectedFolks(
+                    isSelected
+                      ? selectedFolks.filter(it => !(it.name === per.name))
+                      : selectedFolks.concat([per])
+                  );
+                }}
+                src={per.avatar}
+              />
+            );
+          })}
+        </div>
+      )}
+      {!error.length && !success.length && (
+        <div>
+          <button
+            disabled={selectedFolks.length !== 1}
+            onClick={() => {
+              sendMessage(
+                'kaffe_register/read_card',
+                JSON.stringify({ uid: selectedFolks[0].uids[0] })
+              );
+              setSelectedFolks([]);
+            }}
+          >
+            ☕
+          </button>
+          <button
+            disabled={selectedFolks.length === 0}
+            onClick={() => {
+              selectedFolks.forEach(person => {
+                sendMessage(
+                  'brus_register/read_card',
+                  JSON.stringify({
+                    datetime: new Date(),
+                    shopping_cart: cart,
+                    uid: person.uids[0]
+                  })
+                );
+              });
+              resetCart();
+            }}
+          >
+            💶
+          </button>
+        </div>
+      )}
+      {!error.length && !success.length && (
         <table>
           <tbody>
             {products.map(product => (
