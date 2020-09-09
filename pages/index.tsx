@@ -18,7 +18,7 @@ const Product: React.FC<{
       <td>{count}</td>
       <td className="buttons">
         <button onClick={() => setCount(Math.max(count - 1, 0))}>-</button>
-        <button onClick={() => setCount(count < 10 ? count + 1 : 10)}>+</button>
+        <button onClick={() => setCount(count < 30 ? count + 1 : 30)}>+</button>
       </td>
     </tr>
   );
@@ -218,15 +218,15 @@ const BrusGuiAsASingleFunction = () => {
         .filter((item, index) => error.indexOf(item) !== index)
         .map(err => (
           <>
-            {err}
+            Bad: {err}
             <br />
           </>
         ))}
       {success
         .filter((item, index) => success.indexOf(item) !== index)
-        .map(err => (
+        .map(success => (
           <>
-            {err}
+            {success}
             <br />
           </>
         ))}
@@ -256,10 +256,16 @@ const BrusGuiAsASingleFunction = () => {
         <div>
           <button
             disabled={selectedFolks.length !== 1}
+            style={{ opacity: selectedFolks.length === 1 ? 1 : 0.4 }}
             onClick={() => {
               sendMessage(
                 'kaffe_register/read_card',
                 JSON.stringify({ uid: selectedFolks[0].uids[0] })
+              );
+
+              sendMessage(
+                'notification/brus_success',
+                `${selectedFolks[0].name} lager kaffe!!☕☕`
               );
               setSelectedFolks([]);
             }}
@@ -270,6 +276,12 @@ const BrusGuiAsASingleFunction = () => {
             disabled={
               selectedFolks.length === 0 || Object.keys(cart).length === 0
             }
+            style={{
+              opacity:
+                selectedFolks.length === 0 || Object.keys(cart).length === 0
+                  ? 0.4
+                  : 1
+            }}
             onClick={() => {
               const savedCart = cart;
               selectedFolks.forEach(person => {
@@ -292,12 +304,47 @@ const BrusGuiAsASingleFunction = () => {
           >
             💶
           </button>
+          <button
+            disabled={
+              selectedFolks.length !== 1 || Object.keys(cart).length === 0
+            }
+            style={{
+              opacity:
+                selectedFolks.length !== 1 || Object.keys(cart).length === 0
+                  ? 0.4
+                  : 1
+            }}
+            onClick={() => {
+              const savedCart = cart;
+              selectedFolks.forEach(person => {
+                sendMessage(
+                  'brus_register/read_card',
+                  JSON.stringify({
+                    datetime: new Date(),
+                    shopping_cart: JSON.stringify(
+                      Object.entries(savedCart)
+                        .filter(([, count]) => count)
+                        .map(([key, count]) => ({
+                          product_name: key,
+                          count: -count
+                        }))
+                    ),
+                    uid: person.uids[0]
+                  })
+                );
+              });
+              resetCart();
+              setSelectedFolks([]);
+            }}
+          >
+            🛒
+          </button>
         </div>
       )}
       {!error.length && !success.length && (
         <table>
           <tbody>
-            {products.map(product => (
+            {products.reverse().map(product => (
               <Product
                 key={product.key}
                 product={product}
