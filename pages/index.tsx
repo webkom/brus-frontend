@@ -45,6 +45,35 @@ type Person = {
   name: string;
 };
 
+interface PurchaseSummary {
+  soda: number;
+  beer: number;
+}
+
+interface ProductsBought {
+  key: string;
+  name: string;
+  bottle_type: string;
+  product_type: string;
+  image: string;
+  current_price: number;
+  price_history: number[];
+  count: number;
+}
+
+interface BrusEntry {
+  name: string;
+  balance: number;
+  purchase_summary: PurchaseSummary;
+  products_bought: ProductsBought[];
+}
+
+const getBrusListe = async () => {
+  const res = await fetch('https://brus.abakus.no/api/liste/');
+  const products: BrusEntry[] = await res.json();
+  return products;
+};
+
 const getProducts = async () => {
   const res = await fetch('https://brus.abakus.no/api/liste/products/');
   const products: Product[] = await res.json();
@@ -73,17 +102,25 @@ const BrusGuiAsASingleFunction = () => {
     [client.current]
   );
 
+  const [error, setError] = useState<Array<String>>([]);
+  const [success, setSuccess] = useState<Array<String>>([]);
+
   const [products, setProducts] = useState<Product[]>([]);
+  const [brusEntries, setBrusEntries] = useState<BrusEntry[]>([]);
   // Fetch products from brus API
+  useEffect(() => {
+    (async () => {
+      const entries = await getBrusListe();
+      setBrusEntries(entries);
+    })();
+  }, [success]);
+
   useEffect(() => {
     (async () => {
       const products = await getProducts();
       setProducts(products.reverse());
     })();
   }, []);
-
-  const [error, setError] = useState<Array<String>>([]);
-  const [success, setSuccess] = useState<Array<String>>([]);
 
   const [cart, setCart] = useState<Cart>({});
   // Change cart and publish to MQTT
@@ -217,10 +254,10 @@ const BrusGuiAsASingleFunction = () => {
         }
       `}</style>
       {error.map(err => (
-        <div>Bad: {err}</div>
+        <div>{err}</div>
       ))}
       {success.map(success => (
-        <div>Good: {success}</div>
+        <div>{success}</div>
       ))}
       {!error.length && !success.length && (
         <div
@@ -361,6 +398,37 @@ const BrusGuiAsASingleFunction = () => {
               ))}
           </tbody>
         </table>
+      )}
+
+      {!error.length && !success.length && (
+        <div style={{ fontSize: 14 }}>
+          <p> Stats </p>
+          Total saldo:{' '}
+          {brusEntries
+            .map(entry => entry.balance)
+            .reduce((a, b) => a + b, 0)
+            .toFixed(2)}
+          <br />
+          Est. beer count:{' '}
+          {(
+            brusEntries.map(entry => entry.balance).reduce((a, b) => a + b, 0) /
+            (
+              products.find(product => product.key === 'beer_dahls_bottle') || {
+                current_price: 22
+              }
+            ).current_price
+          ).toFixed(0)}
+          <br />
+          {brusEntries
+            .slice()
+            .sort((a, b) => a.balance - b.balance)
+            .filter(entry => entry.balance)
+            .map(entry => (
+              <>
+                {entry.name}: {entry.balance},{' '}
+              </>
+            ))}
+        </div>
       )}
     </>
   );
