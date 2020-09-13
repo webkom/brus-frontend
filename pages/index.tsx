@@ -15,7 +15,10 @@ const Product: React.FC<{
         {product.name}
         <div className="price">{product.current_price},-</div>
       </td>
-      <td>{count}</td>
+      <td>
+        {count}
+        <span style={{ fontSize: 14 }}> per pers</span>
+      </td>
       <td className="buttons">
         <button onClick={() => setCount(Math.max(count - 1, 0))}>-</button>
         <button onClick={() => setCount(count < 30 ? count + 1 : 30)}>+</button>
@@ -225,7 +228,7 @@ const BrusGuiAsASingleFunction = () => {
         html,
         button {
           font-family: 'Open Sans', sans-serif;
-          font-size: 40px;
+          font-size: 26px;
         }
         img {
           width: 60px;
@@ -244,8 +247,8 @@ const BrusGuiAsASingleFunction = () => {
           white-space: nowrap;
         }
         button {
-          width: 100px;
-          height: 100px;
+          width: 60px;
+          height: 60px;
           margin: 10px;
         }
         table {
@@ -272,7 +275,10 @@ const BrusGuiAsASingleFunction = () => {
             const isSelected = selectedFolks.find(it => per.name === it.name);
             return (
               <img
-                style={{ opacity: isSelected ? 1 : 0.4 }}
+                style={{
+                  opacity: isSelected ? 1 : 0.4,
+                  border: isSelected ? '2px solid green' : '2px solid white'
+                }}
                 onClick={() => {
                   setSelectedFolks(
                     isSelected
@@ -285,6 +291,26 @@ const BrusGuiAsASingleFunction = () => {
             );
           })}
         </div>
+      )}
+      {!error.length && !success.length && (
+        <>
+          <table>
+            <tbody>
+              {products
+                .filter(product =>
+                  onlyShow.length > 0 ? onlyShow.includes(product.key) : true
+                )
+                .map(product => (
+                  <Product
+                    key={product.key}
+                    product={product}
+                    count={cart[product.key] || 0}
+                    setCount={(count: number) => changeCart(product.key, count)}
+                  />
+                ))}
+            </tbody>
+          </table>
+        </>
       )}
       {!error.length && !success.length && (
         <div
@@ -380,24 +406,6 @@ const BrusGuiAsASingleFunction = () => {
             📦
           </button>
         </div>
-      )}
-      {!error.length && !success.length && (
-        <table>
-          <tbody>
-            {products
-              .filter(product =>
-                onlyShow.length > 0 ? onlyShow.includes(product.key) : true
-              )
-              .map(product => (
-                <Product
-                  key={product.key}
-                  product={product}
-                  count={cart[product.key] || 0}
-                  setCount={(count: number) => changeCart(product.key, count)}
-                />
-              ))}
-          </tbody>
-        </table>
       )}
 
       {!error.length && !success.length && (
