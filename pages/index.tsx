@@ -472,7 +472,6 @@ const BrusGuiAsASingleFunction = () => {
               }
             ).current_price
           ).toFixed(0)}
-          ,-
           <br />
           <hr />
           {brusEntries
