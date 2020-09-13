@@ -386,7 +386,7 @@ const BrusGuiAsASingleFunction = () => {
               width: 100,
               fontSize: 70,
               height: 100,
-              opacity: cantBuy ? 0.8 : 1
+              opacity: cantBuy ? 0.4 : 1
             }}
             onClick={() => {
               const savedCart = cart;
@@ -408,7 +408,7 @@ const BrusGuiAsASingleFunction = () => {
               setSelectedFolks([]);
             }}
           >
-            💶
+            🍺
           </button>
           <button
             disabled={cantBuy}
@@ -416,7 +416,7 @@ const BrusGuiAsASingleFunction = () => {
               width: 100,
               fontSize: 70,
               height: 100,
-              opacity: cantBuy ? 0.8 : 1
+              opacity: cantBuy ? 0.4 : 1
             }}
             onClick={() => {
               if (
@@ -456,7 +456,6 @@ const BrusGuiAsASingleFunction = () => {
       {!error.length && !success.length && (
         <div style={{ fontSize: 14, textAlign: 'center' }}>
           <hr />
-          <h3> Statistikk </h3>
           Total saldo:{' '}
           {brusEntries
             .map(entry => entry.balance)
