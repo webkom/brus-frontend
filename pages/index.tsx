@@ -93,7 +93,15 @@ const BrusGuiAsASingleFunction = () => {
       const entries = await getBrusListe();
       setBrusEntries(entries);
     })();
-  }, [success]);
+  }, []);
+  useEffect(() => {
+    (async () => {
+      if (success.length != 0) {
+        const entries = await getBrusListe();
+        setBrusEntries(entries);
+      }
+    })();
+  }, [success.length]);
 
   useEffect(() => {
     (async () => {
