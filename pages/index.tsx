@@ -133,21 +133,13 @@ const BrusGuiAsASingleFunction = () => {
         ...cart,
         [key]: count
       };
-      sendMessage(
-        'fridge/shopping_cart',
-        JSON.stringify(
-          Object.entries(newCart)
-            .filter(([, count]) => count)
-            .map(([key, count]) => ({ product_name: key, count }))
-        )
-      );
       setCart(newCart);
     },
     [cart]
   );
   const resetCart = useCallback(() => {
     setCart({});
-    sendMessage('fridge/shopping_cart', '[]', true);
+    sendMessage('fridge/shopping_cart', '[]', false);
   }, []);
 
   // MQTT subscriptions and message handlers
