@@ -257,10 +257,28 @@ const BrusGuiAsASingleFunction = () => {
         }
       `}</style>
       {error.map(err => (
-        <div>{err}</div>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            fontSize: 45,
+            justifyContent: 'center'
+          }}
+        >
+          {err}
+        </div>
       ))}
       {success.map(success => (
-        <div>{success}</div>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            fontSize: 45,
+            justifyContent: 'center'
+          }}
+        >
+          {success}
+        </div>
       ))}
       {!error.length && !success.length && (
         <div
@@ -276,7 +294,7 @@ const BrusGuiAsASingleFunction = () => {
             return (
               <img
                 style={{
-                  opacity: isSelected ? 1 : 0.4,
+                  opacity: isSelected ? 1 : 0.8,
                   border: isSelected ? '2px solid green' : '2px solid white'
                 }}
                 onClick={() => {
@@ -322,7 +340,12 @@ const BrusGuiAsASingleFunction = () => {
         >
           <button
             disabled={selectedFolks.length !== 1}
-            style={{ opacity: selectedFolks.length === 1 ? 1 : 0.4 }}
+            style={{
+              fontSize: 70,
+              width: 100,
+              height: 100,
+              opacity: selectedFolks.length === 1 ? 1 : 0.4
+            }}
             onClick={() => {
               sendMessage(
                 'kaffe_register/read_card',
@@ -343,6 +366,9 @@ const BrusGuiAsASingleFunction = () => {
               selectedFolks.length === 0 || Object.keys(cart).length === 0
             }
             style={{
+              width: 100,
+              fontSize: 70,
+              height: 100,
               opacity:
                 selectedFolks.length === 0 || Object.keys(cart).length === 0
                   ? 0.4
@@ -375,12 +401,22 @@ const BrusGuiAsASingleFunction = () => {
               selectedFolks.length !== 1 || Object.keys(cart).length === 0
             }
             style={{
+              width: 100,
+              fontSize: 70,
+              height: 100,
               opacity:
                 selectedFolks.length !== 1 || Object.keys(cart).length === 0
                   ? 0.4
                   : 1
             }}
             onClick={() => {
+              if (
+                !confirm(
+                  'Er du sikker på at du skal fylle på med drikke og ikke kjøpe?'
+                )
+              ) {
+                return;
+              }
               const savedCart = cart;
               selectedFolks.forEach(person => {
                 sendMessage(
