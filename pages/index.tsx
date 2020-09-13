@@ -4,29 +4,6 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import 'isomorphic-fetch';
 
-const Product: React.FC<{
-  product: Product;
-  count: number;
-  setCount: (count: number) => void;
-}> = ({ product, count, setCount }) => {
-  return (
-    <tr>
-      <td>
-        {product.name}
-        <div className="price">{product.current_price},-</div>
-      </td>
-      <td>
-        {count}
-        <span style={{ fontSize: 14 }}> per pers</span>
-      </td>
-      <td className="buttons">
-        <button onClick={() => setCount(Math.max(count - 1, 0))}>-</button>
-        <button onClick={() => setCount(count < 30 ? count + 1 : 30)}>+</button>
-      </td>
-    </tr>
-  );
-};
-
 type Cart = {
   [key: string]: number;
 };
@@ -352,14 +329,35 @@ const BrusGuiAsASingleFunction = () => {
                 .filter(product =>
                   onlyShow.length > 0 ? onlyShow.includes(product.key) : true
                 )
-                .map(product => (
-                  <Product
-                    key={product.key}
-                    product={product}
-                    count={cart[product.key] || 0}
-                    setCount={(count: number) => changeCart(product.key, count)}
-                  />
-                ))}
+                .map(product => {
+                  const count = cart[product.key] || 0;
+                  const setCount = (count: number) =>
+                    changeCart(product.key, count);
+                  return (
+                    <tr key={product.key}>
+                      <td>
+                        {product.name}
+                        <div className="price">{product.current_price},-</div>
+                      </td>
+                      <td>
+                        {count}
+                        <span style={{ fontSize: 14 }}> per pers</span>
+                      </td>
+                      <td className="buttons">
+                        <button
+                          onClick={() => setCount(Math.max(count - 1, 0))}
+                        >
+                          -
+                        </button>
+                        <button
+                          onClick={() => setCount(count < 30 ? count + 1 : 30)}
+                        >
+                          +
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </>
