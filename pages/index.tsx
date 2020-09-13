@@ -218,6 +218,16 @@ const BrusGuiAsASingleFunction = () => {
 
   if (!mqttServer) return <h1> U drunk.</h1>;
 
+  // Is true if the buy/fill button should be disabled
+  const cantBuy =
+    selectedFolks.length === 0 ||
+    Object.keys(cart).reduce((acc, val) => acc + cart[val], 0) === 0;
+
+  // Is true if the brew button should be disabled
+  const cantBrew =
+    selectedFolks.length !== 1 ||
+    Object.keys(cart).reduce((acc, val) => acc + cart[val], 0) > 0;
+
   return (
     <>
       <Head>
@@ -281,34 +291,66 @@ const BrusGuiAsASingleFunction = () => {
         </div>
       ))}
       {!error.length && !success.length && (
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center'
-          }}
-        >
-          {' '}
-          {folks.map(per => {
-            const isSelected = selectedFolks.find(it => per.name === it.name);
-            return (
-              <img
-                style={{
-                  opacity: isSelected ? 1 : 0.8,
-                  border: isSelected ? '2px solid green' : '2px solid white'
-                }}
-                onClick={() => {
-                  setSelectedFolks(
-                    isSelected
-                      ? selectedFolks.filter(it => !(it.name === per.name))
-                      : selectedFolks.concat([per])
-                  );
-                }}
-                src={per.avatar}
-              />
-            );
-          })}
-        </div>
+        <>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'center'
+            }}
+          >
+            {' '}
+            {folks.map(per => {
+              const isSelected = selectedFolks.find(it => per.name === it.name);
+              return (
+                <img
+                  style={{
+                    opacity: isSelected ? 1 : 0.8,
+                    border: isSelected ? '2px solid green' : '2px solid white'
+                  }}
+                  onClick={() => {
+                    setSelectedFolks(
+                      isSelected
+                        ? selectedFolks.filter(it => !(it.name === per.name))
+                        : selectedFolks.concat([per])
+                    );
+                  }}
+                  src={per.avatar}
+                />
+              );
+            })}
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center'
+            }}
+          >
+            <button
+              disabled={cantBrew}
+              style={{
+                fontSize: 70,
+                width: 100,
+                height: 100,
+                opacity: cantBrew ? 0.4 : 1
+              }}
+              onClick={() => {
+                sendMessage(
+                  'kaffe_register/read_card',
+                  JSON.stringify({ uid: selectedFolks[0].uids[0] })
+                );
+
+                sendMessage(
+                  'notification/brus_success',
+                  `${selectedFolks[0].name} lager kaffe!!☕☕`
+                );
+                setSelectedFolks([]);
+              }}
+            >
+              ☕
+            </button>
+          </div>
+        </>
       )}
       {!error.length && !success.length && (
         <>
@@ -339,40 +381,12 @@ const BrusGuiAsASingleFunction = () => {
           }}
         >
           <button
-            disabled={selectedFolks.length !== 1}
-            style={{
-              fontSize: 70,
-              width: 100,
-              height: 100,
-              opacity: selectedFolks.length === 1 ? 1 : 0.4
-            }}
-            onClick={() => {
-              sendMessage(
-                'kaffe_register/read_card',
-                JSON.stringify({ uid: selectedFolks[0].uids[0] })
-              );
-
-              sendMessage(
-                'notification/brus_success',
-                `${selectedFolks[0].name} lager kaffe!!☕☕`
-              );
-              setSelectedFolks([]);
-            }}
-          >
-            ☕
-          </button>
-          <button
-            disabled={
-              selectedFolks.length === 0 || Object.keys(cart).length === 0
-            }
+            disabled={cantBuy}
             style={{
               width: 100,
               fontSize: 70,
               height: 100,
-              opacity:
-                selectedFolks.length === 0 || Object.keys(cart).length === 0
-                  ? 0.4
-                  : 1
+              opacity: cantBuy ? 0.8 : 1
             }}
             onClick={() => {
               const savedCart = cart;
@@ -397,17 +411,12 @@ const BrusGuiAsASingleFunction = () => {
             💶
           </button>
           <button
-            disabled={
-              selectedFolks.length !== 1 || Object.keys(cart).length === 0
-            }
+            disabled={cantBuy}
             style={{
               width: 100,
               fontSize: 70,
               height: 100,
-              opacity:
-                selectedFolks.length !== 1 || Object.keys(cart).length === 0
-                  ? 0.4
-                  : 1
+              opacity: cantBuy ? 0.8 : 1
             }}
             onClick={() => {
               if (
@@ -445,15 +454,17 @@ const BrusGuiAsASingleFunction = () => {
       )}
 
       {!error.length && !success.length && (
-        <div style={{ fontSize: 14 }}>
-          <p> Stats </p>
+        <div style={{ fontSize: 14, textAlign: 'center' }}>
+          <hr />
+          <h3> Statistikk </h3>
           Total saldo:{' '}
           {brusEntries
             .map(entry => entry.balance)
             .reduce((a, b) => a + b, 0)
             .toFixed(2)}
+          ,-
           <br />
-          Est. beer count:{' '}
+          Estimert ølmengde:{' '}
           {(
             brusEntries.map(entry => entry.balance).reduce((a, b) => a + b, 0) /
             (
@@ -462,14 +473,20 @@ const BrusGuiAsASingleFunction = () => {
               }
             ).current_price
           ).toFixed(0)}
+          ,-
           <br />
+          <hr />
           {brusEntries
             .slice()
             .sort((a, b) => a.balance - b.balance)
             .filter(entry => entry.balance)
             .map(entry => (
               <>
-                {entry.name}: {entry.balance},{' '}
+                {entry.name}:{' '}
+                <span style={{ color: entry.balance > 0 ? 'green' : 'red' }}>
+                  {entry.balance}
+                </span>
+                ,{' '}
               </>
             ))}
         </div>
