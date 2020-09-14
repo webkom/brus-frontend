@@ -1,4 +1,10 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo
+} from 'react';
 import mqtt, { MqttClient } from 'mqtt/dist/mqtt';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
@@ -64,12 +70,20 @@ const getProducts = async () => {
 const BrusGuiAsASingleFunction = () => {
   const router = useRouter();
   const mqttServer = router.query.mqttServer as string;
-  const onlyShow = ((router.query.onlyShow as string) || '')
-    .split(',')
-    .filter(Boolean);
-  const folks = JSON.parse(
-    Buffer.from((router.query.folks as string) || 'W10K', 'base64').toString()
-  ) as Array<Person>;
+  const onlyShow = useMemo(
+    () => ((router.query.onlyShow as string) || '').split(',').filter(Boolean),
+    [router.query.onlyShow]
+  );
+  const folks = useMemo(
+    () =>
+      JSON.parse(
+        Buffer.from(
+          (router.query.folks as string) || 'W10K',
+          'base64'
+        ).toString()
+      ) as Array<Person>,
+    [router.query.folks]
+  );
 
   const [selectedFolks, setSelectedFolks] = useState<Array<Person>>([]);
 
@@ -113,7 +127,7 @@ const BrusGuiAsASingleFunction = () => {
   const [cart, setCart] = useState<Cart>({});
   // Change cart and publish to MQTT
   const changeCart = useCallback(
-    async (key: string, count: number) => {
+    (key: string, count: number) => {
       const newCart = {
         ...cart,
         [key]: count
