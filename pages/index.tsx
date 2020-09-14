@@ -54,18 +54,6 @@ interface BrusEntry {
   products_bought: ProductsBought[];
 }
 
-const getBrusListe = async () => {
-  const res = await fetch('https://brus.abakus.no/api/liste/');
-  const products: BrusEntry[] = await res.json();
-  return products;
-};
-
-const getProducts = async () => {
-  const res = await fetch('https://brus.abakus.no/api/liste/products/');
-  const products: Product[] = await res.json();
-  return products;
-};
-
 // one component does all the things!
 const BrusGuiAsASingleFunction = () => {
   const router = useRouter();
@@ -101,17 +89,20 @@ const BrusGuiAsASingleFunction = () => {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [brusEntries, setBrusEntries] = useState<BrusEntry[]>([]);
-  // Fetch products from brus API
+
   useEffect(() => {
     (async () => {
-      const entries = await getBrusListe();
+      const res = await fetch('https://brus.abakus.no/api/liste/');
+      const entries: BrusEntry[] = await res.json();
       setBrusEntries(entries);
     })();
   }, []);
+
   useEffect(() => {
     (async () => {
       if (success.length != 0) {
-        const entries = await getBrusListe();
+        const res = await fetch('https://brus.abakus.no/api/liste/');
+        const entries: BrusEntry[] = await res.json();
         setBrusEntries(entries);
       }
     })();
@@ -119,7 +110,8 @@ const BrusGuiAsASingleFunction = () => {
 
   useEffect(() => {
     (async () => {
-      const products = await getProducts();
+      const res = await fetch('https://brus.abakus.no/api/liste/products/');
+      const products: Product[] = await res.json();
       setProducts(products.reverse());
     })();
   }, []);
