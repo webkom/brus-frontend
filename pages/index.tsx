@@ -1,4 +1,10 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo
+} from 'react';
 import mqtt, { MqttClient } from 'mqtt/dist/mqtt';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
@@ -48,28 +54,24 @@ interface BrusEntry {
   products_bought: ProductsBought[];
 }
 
-const getBrusListe = async () => {
-  const res = await fetch('https://brus.abakus.no/api/liste/');
-  const products: BrusEntry[] = await res.json();
-  return products;
-};
-
-const getProducts = async () => {
-  const res = await fetch('https://brus.abakus.no/api/liste/products/');
-  const products: Product[] = await res.json();
-  return products;
-};
-
 // one component does all the things!
 const BrusGuiAsASingleFunction = () => {
   const router = useRouter();
   const mqttServer = router.query.mqttServer as string;
-  const onlyShow = ((router.query.onlyShow as string) || '')
-    .split(',')
-    .filter(Boolean);
-  const folks = JSON.parse(
-    Buffer.from((router.query.folks as string) || 'W10K', 'base64').toString()
-  ) as Array<Person>;
+  const onlyShow = useMemo(
+    () => ((router.query.onlyShow as string) || '').split(',').filter(Boolean),
+    [router.query.onlyShow]
+  );
+  const folks = useMemo(
+    () =>
+      JSON.parse(
+        Buffer.from(
+          (router.query.folks as string) || 'W10K',
+          'base64'
+        ).toString()
+      ) as Array<Person>,
+    [router.query.folks]
+  );
 
   const [selectedFolks, setSelectedFolks] = useState<Array<Person>>([]);
 
@@ -87,17 +89,20 @@ const BrusGuiAsASingleFunction = () => {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [brusEntries, setBrusEntries] = useState<BrusEntry[]>([]);
-  // Fetch products from brus API
+
   useEffect(() => {
     (async () => {
-      const entries = await getBrusListe();
+      const res = await fetch('https://brus.abakus.no/api/liste/');
+      const entries: BrusEntry[] = await res.json();
       setBrusEntries(entries);
     })();
   }, []);
+
   useEffect(() => {
     (async () => {
       if (success.length != 0) {
-        const entries = await getBrusListe();
+        const res = await fetch('https://brus.abakus.no/api/liste/');
+        const entries: BrusEntry[] = await res.json();
         setBrusEntries(entries);
       }
     })();
@@ -105,7 +110,8 @@ const BrusGuiAsASingleFunction = () => {
 
   useEffect(() => {
     (async () => {
-      const products = await getProducts();
+      const res = await fetch('https://brus.abakus.no/api/liste/products/');
+      const products: Product[] = await res.json();
       setProducts(products.reverse());
     })();
   }, []);
@@ -113,7 +119,7 @@ const BrusGuiAsASingleFunction = () => {
   const [cart, setCart] = useState<Cart>({});
   // Change cart and publish to MQTT
   const changeCart = useCallback(
-    async (key: string, count: number) => {
+    (key: string, count: number) => {
       const newCart = {
         ...cart,
         [key]: count
@@ -195,15 +201,13 @@ const BrusGuiAsASingleFunction = () => {
 
   if (!mqttServer) return <h1> U drunk.</h1>;
 
+  const cartCount = Object.keys(cart).reduce((acc, val) => acc + cart[val], 0);
+
   // Is true if the buy/fill button should be disabled
-  const cantBuy =
-    selectedFolks.length === 0 ||
-    Object.keys(cart).reduce((acc, val) => acc + cart[val], 0) === 0;
+  const cantBuy = selectedFolks.length === 0 || cartCount === 0;
 
   // Is true if the brew button should be disabled
-  const cantBrew =
-    selectedFolks.length !== 1 ||
-    Object.keys(cart).reduce((acc, val) => acc + cart[val], 0) > 0;
+  const cantBrew = selectedFolks.length !== 1 || cartCount > 0;
 
   return (
     <>
