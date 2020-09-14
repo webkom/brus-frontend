@@ -209,15 +209,13 @@ const BrusGuiAsASingleFunction = () => {
 
   if (!mqttServer) return <h1> U drunk.</h1>;
 
+  const cartCount = Object.keys(cart).reduce((acc, val) => acc + cart[val], 0);
+
   // Is true if the buy/fill button should be disabled
-  const cantBuy =
-    selectedFolks.length === 0 ||
-    Object.keys(cart).reduce((acc, val) => acc + cart[val], 0) === 0;
+  const cantBuy = selectedFolks.length === 0 || cartCount === 0;
 
   // Is true if the brew button should be disabled
-  const cantBrew =
-    selectedFolks.length !== 1 ||
-    Object.keys(cart).reduce((acc, val) => acc + cart[val], 0) > 0;
+  const cantBrew = selectedFolks.length !== 1 || cartCount > 0;
 
   return (
     <>
