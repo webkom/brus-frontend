@@ -29,6 +29,7 @@ type Person = {
   avatar: string;
   uids: Array<string>;
   name: string;
+  brus: string;
 };
 
 interface PurchaseSummary {
@@ -281,25 +282,38 @@ const BrusGuiAsASingleFunction = () => {
             }}
           >
             {' '}
-            {folks.map(per => {
-              const isSelected = selectedFolks.find(it => per.name === it.name);
-              return (
-                <img
-                  style={{
-                    opacity: isSelected ? 1 : 0.8,
-                    border: isSelected ? '2px solid green' : '2px solid white'
-                  }}
-                  onClick={() => {
-                    setSelectedFolks(
-                      isSelected
-                        ? selectedFolks.filter(it => !(it.name === per.name))
-                        : selectedFolks.concat([per])
-                    );
-                  }}
-                  src={per.avatar}
-                />
-              );
-            })}
+            {folks
+              .map(per => {
+                const brusUser = brusEntries.find(obj => per.brus === obj.name);
+                const beerCount = brusUser && brusUser.purchase_summary.beer;
+                return [beerCount, per];
+              })
+              .slice()
+              .sort(
+                ([beerCountA]: [number], [beerCountB]: [number]) =>
+                  beerCountB - beerCountA
+              )
+              .map(([beerCount, per]: [number, Person]) => {
+                const isSelected = selectedFolks.find(
+                  it => per.name === it.name
+                );
+                return (
+                  <img
+                    style={{
+                      opacity: isSelected ? 1 : 0.8,
+                      border: isSelected ? '2px solid green' : '2px solid white'
+                    }}
+                    onClick={() => {
+                      setSelectedFolks(
+                        isSelected
+                          ? selectedFolks.filter(it => !(it.name === per.name))
+                          : selectedFolks.concat([per])
+                      );
+                    }}
+                    src={per.avatar}
+                  />
+                );
+              })}
           </div>
           <div
             style={{
