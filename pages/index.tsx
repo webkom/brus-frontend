@@ -80,7 +80,7 @@ const BrusGuiAsASingleFunction = () => {
   const sendMessage = useCallback(
     (topic, message, retain = false) => {
       console.log('Sending msg on topic', topic, message);
-      client.current.publish(topic, message, { qos: 1, retain });
+      client.current.publish(topic, message, { qos: 0, retain });
     },
     [client.current]
   );
