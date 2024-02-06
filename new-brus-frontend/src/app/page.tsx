@@ -1,95 +1,142 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+
+import NextImage from 'next/image';
+import {
+  Box,
+  Button,
+  Card,
+  CardBody,
+  Center,
+  Grid,
+  GridItem,
+  HStack,
+  Heading,
+  IconButton,
+  Image,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Text,
+  VStack,
+  useDisclosure,
+} from '@chakra-ui/react';
 
 export default function Home() {
+  const { isOpen, onClose, onOpen } = useDisclosure();
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+    <VStack
+      h={'100%'}
+      w={'100%'}
+      backgroundColor={'blackAlpha.200'}
+      display={'flex'}
+      align={'center'}
+    >
+      <Heading
+        fontSize="50"
+        color={'black'}
+        textAlign={'center'}
+        marginTop={'4'}
+      >
+        BRUS
+      </Heading>
+      <HStack wrap={'wrap'}>
+        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+      </HStack>
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+      <Button
+        colorScheme="red"
+        variant={'ghost'}
+        fontSize="50px"
+        onClick={onOpen}
+      >
+        Wall of Shame
+      </Button>
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+      <Card backgroundColor={'blackAlpha.300'}>
+        <CardBody>
+          <Button colorScheme="red" variant={'ghost'} fontSize="50px">
+            X
+          </Button>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
+          <HStack justify={'center'}>
+            <Button colorScheme="red" variant={'ghost'} fontSize="50px">
+              +
+            </Button>
+            <Heading fontSize="40px">4</Heading>
+            <Button colorScheme="red" variant={'ghost'} fontSize="50px">
+              -
+            </Button>
+          </HStack>
+          <HStack>
+            <VStack>
+              <Heading
+                marginRight="100px"
+                color={'black'}
+                textAlign={'right'}
+                marginTop={'4'}
+              >
+                Ta en til bitch
+              </Heading>
+              <IconButton
+              backgroundColor={'blackAlpha.300'}
+                icon={<Image src="/dahls.png" />}
+                aria-label={'Øl'}
+              />
+            </VStack>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
+            <VStack>
+              <Card>
+                <Heading marginLeft="100px" color={'black'} textAlign={'left'}>
+                  Fyll på kassa
+                </Heading>
+                <IconButton
+                  icon={<Image height="100px" src="/dahlsBox.jpg" />}
+                  aria-label={'Øl'}
+                />
+              </Card>
+            </VStack>
+          </HStack>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+          <Heading textAlign={'center'}>Saldo:</Heading>
+        </CardBody>
+      </Card>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader textAlign="center" textColor="red" fontSize="50px">
+            Wall of Shame
+          </ModalHeader>
+          <Card>
+            <Text textAlign="center">Whats your excusee??</Text>
+            <HStack justify={'center'}>
+              <NextImage height={200} width={200} src={'/Profile.jpg'} />
+            </HStack>
+          </Card>
+          <ModalCloseButton />
+          <ModalBody>{/* <Lorem count={2} /> */}</ModalBody>
+
+          <ModalFooter></ModalFooter>
+        </ModalContent>
+      </Modal>
+    </VStack>
   );
 }
