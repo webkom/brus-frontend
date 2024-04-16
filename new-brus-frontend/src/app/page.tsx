@@ -11,10 +11,27 @@ import {
 } from '@chakra-ui/react';
 import WallOfShameModal from '@/components/wallofshame-modal';
 import BuyBrusModal from '@/components/buy-brus-modal';
+import { useEffect, useState } from 'react';
+type User = {
+  name: string;
+  saldo: number;
+};
 
 export default function Home() {
   const wallOfShameDisclosure = useDisclosure();
   const buyBrusDisclosure = useDisclosure();
+
+  const [users, setUsers] = useState<User[]>([]);
+
+  const fetchUsers = async () => {
+    const response = await fetch('http://localhost:3000/api/users');
+    const data = await response.json();
+    setUsers(data);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   return (
     <VStack
@@ -34,7 +51,11 @@ export default function Home() {
       </Heading>
 
       <HStack wrap={'wrap'}>
-      <Box onClick={buyBrusDisclosure.onOpen}><NextImage alt={''} height={200} width={200} src={'/Profile.jpg'} /></Box>
+        {users.map((user) => (
+          <Box key={user.name} onClick={buyBrusDisclosure.onOpen}>
+            {user.name}
+          </Box>
+        ))}
       </HStack>
 
       <Button
