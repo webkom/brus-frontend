@@ -35,6 +35,12 @@ export default function Home() {
     fetchUsers();
   }, []);
 
+  const [selectedUser, setSelectedUser] = useState<User>();
+  const handleClick = (user: User) => {
+    setSelectedUser(user);
+    buyBrusDisclosure.onOpen();
+  };
+
   return (
     <VStack
       h={'100%'}
@@ -54,7 +60,7 @@ export default function Home() {
 
       <HStack wrap={'wrap'}>
         {users.map((user) => (
-          <Box key={user.name} onClick={buyBrusDisclosure.onOpen}>
+          <Box key={user.name} onClick={() => handleClick(user)}>
             <UserPicture user={user}></UserPicture>
           </Box>
         ))}
@@ -69,11 +75,14 @@ export default function Home() {
         Wall of Shame
       </Button>
 
-      <BuyBrusModal
-        disclosure={buyBrusDisclosure}
-        text={'kuult'}
-        src={'/dahls.png'}
-      ></BuyBrusModal>
+      {selectedUser && (
+        <BuyBrusModal
+          disclosure={buyBrusDisclosure}
+          text={'kuult'}
+          src={'/dahls.png'}
+          user={selectedUser}
+        ></BuyBrusModal>
+      )}
       <WallOfShameModal
         disclosure={wallOfShameDisclosure}
         users={users}

@@ -19,11 +19,13 @@ import {
 import NextImage from 'next/image';
 import AmountButton from './amount-button';
 import BrusButton from './brus-button';
+import { User } from '@/app/page';
 
 export default function BuyBrusModal(props: {
   text: string;
   src: string;
   disclosure: any;
+  user: User;
 }) {
   return (
     <Modal isOpen={props.disclosure.isOpen} onClose={props.disclosure.onClose}>
@@ -53,7 +55,7 @@ export default function BuyBrusModal(props: {
                     src={'/dahlsBox.jpg'}
                   ></BrusButton>
                 </Flex>
-                <Heading textAlign={'center'}>Saldo:</Heading>
+                <Heading textAlign={'center'}>Saldo: {props.user.saldo}</Heading>
               </CardBody>
             </Card>
           </HStack>
