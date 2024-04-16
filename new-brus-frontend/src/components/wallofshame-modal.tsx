@@ -13,10 +13,11 @@ import {
 } from '@chakra-ui/react';
 
 import NextImage from 'next/image';
+import UserPicture from './userpicture';
+import { User } from '@/app/page';
 
 export default function WallOfShameModal(props: {
-  text: string;
-  src: string;
+  users: User[];
   disclosure: any;
 }) {
   return (
@@ -29,12 +30,11 @@ export default function WallOfShameModal(props: {
         <Card>
           <Text textAlign="center">Whats your excusee??</Text>
           <HStack justify={'center'}>
-            <NextImage
-              alt={props.text}
-              height={200}
-              width={200}
-              src={props.src}
-            />
+            {props.users
+              .filter((user) => user.saldo < 0)
+              .map((user) => (
+                <UserPicture key={user.name} user={user}></UserPicture>
+              ))}
           </HStack>
         </Card>
         <ModalCloseButton />

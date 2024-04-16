@@ -12,9 +12,11 @@ import {
 import WallOfShameModal from '@/components/wallofshame-modal';
 import BuyBrusModal from '@/components/buy-brus-modal';
 import { useEffect, useState } from 'react';
-type User = {
+import UserPicture from '@/components/userpicture';
+export type User = {
   name: string;
   saldo: number;
+  picture: string;
 };
 
 export default function Home() {
@@ -53,7 +55,7 @@ export default function Home() {
       <HStack wrap={'wrap'}>
         {users.map((user) => (
           <Box key={user.name} onClick={buyBrusDisclosure.onOpen}>
-            {user.name}
+            <UserPicture user={user}></UserPicture>
           </Box>
         ))}
       </HStack>
@@ -74,8 +76,7 @@ export default function Home() {
       ></BuyBrusModal>
       <WallOfShameModal
         disclosure={wallOfShameDisclosure}
-        text={'kult'}
-        src="/Profile.jpg"
+        users={users}
       ></WallOfShameModal>
     </VStack>
   );
