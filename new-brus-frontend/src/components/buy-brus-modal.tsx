@@ -26,7 +26,25 @@ export default function BuyBrusModal(props: {
   src: string;
   disclosure: any;
   user: User;
+  fetchUsers: () => void;
 }) {
+  const buyBrus = async (amount: number) => {
+    const requestBody = {
+      username: props.user.name,
+      amount,
+    };
+
+    const response = await fetch('http://localhost:3000/api/buybrus', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    props.fetchUsers();
+  };
+
   return (
     <Modal isOpen={props.disclosure.isOpen} onClose={props.disclosure.onClose}>
       <ModalOverlay />
@@ -38,24 +56,22 @@ export default function BuyBrusModal(props: {
           <HStack justify={'center'}>
             <Card>
               <CardBody>
-                <HStack justify={'center'}>
-                  <AmountButton text={'+'}></AmountButton>
-                  <Heading fontSize="40px">4</Heading>
-                  <AmountButton text={'-'}></AmountButton>
-                </HStack>
-
                 <Flex>
                   <BrusButton
+                    onClick={() => buyBrus(1)}
                     text={'Ta en til, bitch'}
                     src={'/dahls.png'}
                   ></BrusButton>
                   <Spacer />
                   <BrusButton
+                    onClick={() => buyBrus(-1)}
                     text={'Fyll på kassa'}
                     src={'/dahlsBox.jpg'}
                   ></BrusButton>
                 </Flex>
-                <Heading textAlign={'center'}>Saldo: {props.user.saldo}</Heading>
+                <Heading textAlign={'center'}>
+                  Saldo: {props.user.saldo}
+                </Heading>
               </CardBody>
             </Card>
           </HStack>

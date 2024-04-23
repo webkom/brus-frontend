@@ -35,9 +35,9 @@ export default function Home() {
     fetchUsers();
   }, []);
 
-  const [selectedUser, setSelectedUser] = useState<User>();
-  const handleClick = (user: User) => {
-    setSelectedUser(user);
+  const [selectedUserIndex, setSelectedUserIndex] = useState<number>();
+  const handleClick = (index: number) => {
+    setSelectedUserIndex(index);
     buyBrusDisclosure.onOpen();
   };
 
@@ -59,8 +59,8 @@ export default function Home() {
       </Heading>
 
       <HStack wrap={'wrap'}>
-        {users.map((user) => (
-          <Box key={user.name} onClick={() => handleClick(user)}>
+        {users.map((user, i) => (
+          <Box key={user.name} onClick={() => handleClick(i)}>
             <UserPicture user={user}></UserPicture>
           </Box>
         ))}
@@ -75,12 +75,13 @@ export default function Home() {
         Wall of Shame
       </Button>
 
-      {selectedUser && (
+      {selectedUserIndex !== undefined && (
         <BuyBrusModal
           disclosure={buyBrusDisclosure}
           text={'kuult'}
           src={'/dahls.png'}
-          user={selectedUser}
+          user={users[selectedUserIndex]}
+          fetchUsers={fetchUsers}
         ></BuyBrusModal>
       )}
       <WallOfShameModal
