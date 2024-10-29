@@ -4,29 +4,43 @@ import NextImage from 'next/image';
 import {
   Box,
   Button,
-  Card,
-  CardBody,
-  Center,
-  Grid,
-  GridItem,
   HStack,
   Heading,
-  IconButton,
-  Image,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Text,
   VStack,
   useDisclosure,
 } from '@chakra-ui/react';
+import WallOfShameModal from '@/components/wallofshame-modal';
+import BuyBrusModal from '@/components/buy-brus-modal';
+import { useEffect, useState } from 'react';
+import UserPicture from '@/components/userpicture';
+export type User = {
+  name: string;
+  saldo: number;
+  picture: string;
+};
 
 export default function Home() {
-  const { isOpen, onClose, onOpen } = useDisclosure();
+  const wallOfShameDisclosure = useDisclosure();
+  const buyBrusDisclosure = useDisclosure();
+
+  const [users, setUsers] = useState<User[]>([]);
+
+  const fetchUsers = async () => {
+    const response = await fetch('http://localhost:3000/api/users');
+    const data = await response.json();
+    setUsers(data);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const [selectedUserIndex, setSelectedUserIndex] = useState<number>();
+  const handleClick = (index: number) => {
+    setSelectedUserIndex(index);
+    buyBrusDisclosure.onOpen();
+  };
+
   return (
     <VStack
       h={'100%'}
@@ -43,100 +57,37 @@ export default function Home() {
       >
         BRUS
       </Heading>
+
       <HStack wrap={'wrap'}>
-        <NextImage height={200} width={200} src={'/Profile.jpg'} />
-        <NextImage height={200} width={200} src={'/Profile.jpg'} />
-        <NextImage height={200} width={200} src={'/Profile.jpg'} />
-        <NextImage height={200} width={200} src={'/Profile.jpg'} />
-        <NextImage height={200} width={200} src={'/Profile.jpg'} />
-        <NextImage height={200} width={200} src={'/Profile.jpg'} />
-        <NextImage height={200} width={200} src={'/Profile.jpg'} />
-        <NextImage height={200} width={200} src={'/Profile.jpg'} />
-        <NextImage height={200} width={200} src={'/Profile.jpg'} />
-        <NextImage height={200} width={200} src={'/Profile.jpg'} />
-        <NextImage height={200} width={200} src={'/Profile.jpg'} />
-        <NextImage height={200} width={200} src={'/Profile.jpg'} />
-        <NextImage height={200} width={200} src={'/Profile.jpg'} />
-        <NextImage height={200} width={200} src={'/Profile.jpg'} />
-        <NextImage height={200} width={200} src={'/Profile.jpg'} />
+        {users.map((user, i) => (
+          <Box key={user.name} onClick={() => handleClick(i)}>
+            <UserPicture user={user}></UserPicture>
+          </Box>
+        ))}
       </HStack>
 
       <Button
         colorScheme="red"
         variant={'ghost'}
         fontSize="50px"
-        onClick={onOpen}
+        onClick={wallOfShameDisclosure.onOpen}
       >
         Wall of Shame
       </Button>
 
-      <Card backgroundColor={'blackAlpha.300'}>
-        <CardBody>
-          <Button colorScheme="red" variant={'ghost'} fontSize="50px">
-            X
-          </Button>
-
-          <HStack justify={'center'}>
-            <Button colorScheme="red" variant={'ghost'} fontSize="50px">
-              +
-            </Button>
-            <Heading fontSize="40px">4</Heading>
-            <Button colorScheme="red" variant={'ghost'} fontSize="50px">
-              -
-            </Button>
-          </HStack>
-          <HStack>
-            <VStack>
-              <Heading
-                marginRight="100px"
-                color={'black'}
-                textAlign={'right'}
-                marginTop={'4'}
-              >
-                Ta en til bitch
-              </Heading>
-              <IconButton
-              backgroundColor={'blackAlpha.300'}
-                icon={<Image src="/dahls.png" />}
-                aria-label={'Øl'}
-              />
-            </VStack>
-
-            <VStack>
-              <Card>
-                <Heading marginLeft="100px" color={'black'} textAlign={'left'}>
-                  Fyll på kassa
-                </Heading>
-                <IconButton
-                  icon={<Image height="100px" src="/dahlsBox.jpg" />}
-                  aria-label={'Øl'}
-                />
-              </Card>
-            </VStack>
-          </HStack>
-
-          <Heading textAlign={'center'}>Saldo:</Heading>
-        </CardBody>
-      </Card>
-
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader textAlign="center" textColor="red" fontSize="50px">
-            Wall of Shame
-          </ModalHeader>
-          <Card>
-            <Text textAlign="center">Whats your excusee??</Text>
-            <HStack justify={'center'}>
-              <NextImage height={200} width={200} src={'/Profile.jpg'} />
-            </HStack>
-          </Card>
-          <ModalCloseButton />
-          <ModalBody>{/* <Lorem count={2} /> */}</ModalBody>
-
-          <ModalFooter></ModalFooter>
-        </ModalContent>
-      </Modal>
+      {selectedUserIndex !== undefined && (
+        <BuyBrusModal
+          disclosure={buyBrusDisclosure}
+          text={'kuult'}
+          src={'/dahls.png'}
+          user={users[selectedUserIndex]}
+          fetchUsers={fetchUsers}
+        ></BuyBrusModal>
+      )}
+      <WallOfShameModal
+        disclosure={wallOfShameDisclosure}
+        users={users}
+      ></WallOfShameModal>
     </VStack>
   );
 }
