@@ -34,7 +34,7 @@ export default function BuyBrusModal(props: {
       amount,
     };
 
-    const response = await fetch('http://localhost:3000/api/buybrus', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api'}/buybrus`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
