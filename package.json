@@ -1,33 +1,33 @@
 {
-  "name": "brus",
-  "version": "1.0.0",
-  "description": "brus-v",
-  "author": "Odin Ugedal",
-  "license": "MIT",
+  "name": "brus-frontend",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "now-build": "yarn && yarn build",
-    "build": "next build",
     "dev": "next dev",
-    "start": "next start"
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prettier": "prettier --write --list-different ."
   },
   "dependencies": {
-    "@babel/polyfill": "^7.4.4",
-    "@types/isomorphic-fetch": "^0.0.35",
-    "@types/mqtt": "^2.5.0",
-    "isomorphic-fetch": "^2.2.1",
-    "mqtt": "^3.0.0",
-    "next": "^9.3.2",
-    "react": "^16.9.0",
-    "react-dom": "^16.9.0",
-    "tts-js": "^1.0.1"
+    "@chakra-ui/next-js": "^2.2.0",
+    "@chakra-ui/react": "^2.8.2",
+    "@emotion/react": "^11.11.3",
+    "@emotion/styled": "^11.11.0",
+    "eslint-config-prettier": "^9.1.0",
+    "framer-motion": "^10.18.0",
+    "mongodb": "^6.5.0",
+    "next": "14.1.0",
+    "prettier": "^3.2.4",
+    "react": "^18",
+    "react-dom": "^18"
   },
   "devDependencies": {
-    "@types/node": "^12.7.2",
-    "@types/react": "^16.9.2",
-    "prettier": "^1.18.2",
-    "typescript": "^3.5.3"
-  },
-  "prettier": {
-    "singleQuote": true
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.0",
+    "typescript": "^5"
   }
 }
