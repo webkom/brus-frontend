@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { User, getUserCollection } from '../mongodb';
+import { NextResponse } from "next/server";
+import { getUserCollection } from "../mongodb";
 
 const BRUS_COST = 31;
 

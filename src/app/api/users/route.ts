@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { User, getUserCollection } from '../mongodb';
+import { NextResponse } from "next/server";
+import { User, getUserCollection } from "../mongodb";
 
 export async function GET(req: Request) {
   const user_collection = await getUserCollection();

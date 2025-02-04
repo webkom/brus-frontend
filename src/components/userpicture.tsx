@@ -1,4 +1,4 @@
-import { User } from '@/app/page';
+import { User } from "@/app/page";
 
 type UserPictureProps = {
   user: User;

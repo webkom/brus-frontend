@@ -10,11 +10,11 @@ import {
   ModalOverlay,
   Text,
   useDisclosure,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 
-import NextImage from 'next/image';
-import UserPicture from './userpicture';
-import { User } from '@/app/page';
+import NextImage from "next/image";
+import UserPicture from "./userpicture";
+import { User } from "@/app/page";
 
 export default function WallOfShameModal(props: {
   users: User[];
@@ -29,7 +29,7 @@ export default function WallOfShameModal(props: {
         </ModalHeader>
         <Card>
           <Text textAlign="center">Whats your excusee??</Text>
-          <HStack justify={'center'}>
+          <HStack justify={"center"}>
             {props.users
               .filter((user) => user.saldo < 0)
               .map((user) => (

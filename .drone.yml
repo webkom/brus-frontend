@@ -1,0 +1,69 @@
+---
+kind: pipeline
+type: docker
+name: default
+
+trigger:
+  event:
+    exclude:
+      - pull_request
+
+steps:
+  - name: mongodb
+    image: mongo:8.0
+    detach: true
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    when:
+      event: [push]
+      branch:
+        exclude: [build]
+
+  - name: setup
+    image: node:22-alpine
+    when:
+      event: [push]
+      branch:
+        exclude: [build]
+    volumes:
+      - name: yarn_cache
+        path: /tmp/cache
+    commands:
+      - yarn --frozen-lockfile --cache-folder /tmp/cache
+
+  - name: build
+    image: node:22-alpine
+    when:
+      event: [push]
+    depends_on:
+      - setup
+    environment:
+      MONGODB_URI: mongodb://root:root@mongodb:27017
+    commands:
+      - yarn build
+
+  - name: lint
+    image: node:22-alpine
+    when:
+      event: [push]
+    depends_on:
+      - setup
+    commands:
+      - yarn lint
+
+  - name: typescript
+    image: node:22-slim
+    when:
+      event: [push]
+      branch:
+        exclude: [build]
+    depends_on:
+      - setup
+    commands:
+      - yarn types
+
+volumes:
+  - name: yarn_cache
+    host:
+      path: /tmp/drone-cache/yarn
