@@ -1,14 +1,9 @@
 import { Db, MongoClient } from "mongodb";
-
-export type User = {
-  name: string;
-  saldo: number;
-  picture: string;
-};
+import { User } from "../utils/interfaces";
 
 export const getUserCollection = async () => {
   const client: MongoClient = new MongoClient(
-    process.env.MONGODB_URI ?? "mongodb://localhost:27017",
+    process.env.MONGODB_URI ?? "mongodb://localhost:27017"
   );
   await client.connect();
   const db: Db = client.db("brus");
