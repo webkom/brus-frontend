@@ -14,12 +14,12 @@ import {
   Spacer,
   Text,
   useDisclosure,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 
-import NextImage from 'next/image';
-import AmountButton from './amount-button';
-import BrusButton from './brus-button';
-import { User } from '@/app/page';
+import NextImage from "next/image";
+import AmountButton from "./amount-button";
+import BrusButton from "./brus-button";
+import { User } from "@/app/page";
 
 export default function BuyBrusModal(props: {
   text: string;
@@ -34,13 +34,16 @@ export default function BuyBrusModal(props: {
       amount,
     };
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api'}/buybrus`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api"}/buybrus`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
       },
-      body: JSON.stringify(requestBody),
-    });
+    );
 
     props.fetchUsers();
   };
@@ -53,23 +56,23 @@ export default function BuyBrusModal(props: {
           Buy Brus
         </ModalHeader>
         <Card>
-          <HStack justify={'center'}>
+          <HStack justify={"center"}>
             <Card>
               <CardBody>
                 <Flex>
                   <BrusButton
                     onClick={() => buyBrus(1)}
-                    text={'Ta en til, bitch'}
-                    src={'/dahls.png'}
+                    text={"Ta en til, bitch"}
+                    src={"/dahls.png"}
                   ></BrusButton>
                   <Spacer />
                   <BrusButton
                     onClick={() => buyBrus(-1)}
-                    text={'Fyll på kassa'}
-                    src={'/dahlsBox.jpg'}
+                    text={"Fyll på kassa"}
+                    src={"/dahlsBox.jpg"}
                   ></BrusButton>
                 </Flex>
-                <Heading textAlign={'center'}>
+                <Heading textAlign={"center"}>
                   Saldo: {props.user.saldo}
                 </Heading>
               </CardBody>
