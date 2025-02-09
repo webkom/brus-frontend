@@ -10,7 +10,7 @@ interface UserGridProps {
 
 const UserGrid: React.FC<UserGridProps> = ({ className }) => {
   const [users, setUsers] = useState<User[]>([]);
-  const getUsersQuery = useQuery({
+  const {data: users, isLoading, isError, refetch} = useQuery({
     queryKey: ["users"],
     queryFn: getUsers,
   });
