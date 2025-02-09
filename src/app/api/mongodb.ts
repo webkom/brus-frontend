@@ -7,7 +7,7 @@ export const getUserCollection = async () => {
   );
   await client.connect();
   const db: Db = client.db("brus");
-  const user_collection = db.collection<User>("users");
+  const userCollection = db.collection<User>("users");
 
-  return user_collection;
+  return userCollection;
 };
