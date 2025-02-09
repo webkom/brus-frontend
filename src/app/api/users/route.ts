@@ -4,12 +4,11 @@ import { User } from "@/app/utils/interfaces";
 
 export async function GET() {
   try {
-    const user_collection = await getUserCollection();
-    const users: User[] = (await user_collection.find({}).toArray()) as User[];
+    const userCollection = await getUserCollection();
+    const users: User[] = (await userCollection.find({}).toArray()) as User[];
     return NextResponse.json({ users: users }, { status: 200 });
   } catch (error) {
     console.error("Failed to parse JSON response:", error);
+    return NextResponse.json({ error }, { status: 500 });
   }
-
-  return NextResponse.json({ users: [] }, { status: 200 });
 }
