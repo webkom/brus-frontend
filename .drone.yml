@@ -38,6 +38,7 @@ steps:
       event: [push]
     depends_on:
       - setup
+      - mongodb
     environment:
       MONGODB_URI: mongodb://root:root@mongodb:27017
     commands:
