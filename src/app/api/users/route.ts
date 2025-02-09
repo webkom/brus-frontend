@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { User, getUserCollection } from "../mongodb";
+import { getUserCollection } from "../mongodb";
+import { User } from "@/app/utils/interfaces";
 
 export async function GET(req: Request) {
   const user_collection = await getUserCollection();
