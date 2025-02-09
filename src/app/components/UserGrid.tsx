@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UserButton } from "./UserButton";
 import { useQuery } from "@tanstack/react-query";
-import { getUsers } from "../utils/hooks";
+import { getUsers, refetchActiveMembers } from "../utils/hooks";
 
 interface UserGridProps {
   className?: string;
 }
 
 const UserGrid: React.FC<UserGridProps> = ({ className }) => {
+  // Uncomment the following useEffect to add active members to database
+  // useEffect(() => {
+  //   refetchActiveMembers();
+  // }, []);
+
   const {
     data: users,
     isLoading,
