@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { User } from "../utils/interfaces";
-import Image from "next/image";
 import UserImage from "./UserImage";
-import { useQuery } from "@tanstack/react-query";
-import { buyBrus } from "../utils/hooks";
-import { BRUS_COST, BrusType } from "../utils/constants";
 import BuyBrusModal from "./BuyBrusModal";
 
 interface userButtonProps {

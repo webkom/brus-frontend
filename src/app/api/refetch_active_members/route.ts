@@ -27,7 +27,6 @@ export async function GET() {
     console.error("Failed to fetch members:", error);
   }
   if (!(await addUsersToCollection(users))) {
-    console.log(users);
     return NextResponse.json(
       { error: "Failed to add users to database" },
       { status: 500 }

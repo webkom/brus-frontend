@@ -36,8 +36,14 @@ export interface Member {
   authorized_keys: any[];
 }
 
-export interface BuyBrusRequest {
+export interface BuyRefillBrusRequest {
   brusType: BrusType;
-  buyerBrusName: string;
+  userBrusName: string;
   brusAmount: number;
+}
+
+export interface BrusProduct {
+  type: BrusType;
+  price: number;
+  stock: number;
 }
