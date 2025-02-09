@@ -30,7 +30,7 @@ const UserGrid: React.FC<UserGridProps> = ({ className }) => {
 
   return (
     <div
-      className={`grid grid-cols-5 gap-4 p-4 sm:grid-cols-5 max-w-200 m-auto ${className}`}
+      className={`grid grid-cols-4 gap-4 p-4 md:grid-cols-5 lg:grid-cols-6 max-w-200 m-auto ${className}`}
     >
       {getUsersQuery.data.map((user) => (
         <UserButton key={user.brusName} user={user} />
