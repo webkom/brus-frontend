@@ -15,7 +15,7 @@ const UserGrid: React.FC<UserGridProps> = ({ className }) => {
 
   const {
     data: users,
-    isLoading,
+    isFetching,
     isError,
     refetch,
   } = useQuery({
@@ -23,11 +23,11 @@ const UserGrid: React.FC<UserGridProps> = ({ className }) => {
     queryFn: getUsers,
   });
 
-  if (isLoading) {
+  if (isFetching) {
     return <div className="m-auto">Loading users</div>;
   }
 
-  if (isError || !users) {
+  if (isError || !users || users.length === 0) {
     return (
       <div className="flex flex-col items-center">
         <span>Error loading users </span>
