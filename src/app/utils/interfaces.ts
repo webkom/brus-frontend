@@ -1,3 +1,5 @@
+import { BrusType } from "./constants";
+
 export interface User {
   brusName: string;
   github: string;
@@ -34,7 +36,8 @@ export interface Member {
   authorized_keys: any[];
 }
 
-export interface buyBrusRequest {
-  github: string;
+export interface BuyBrusRequest {
+  brusType: BrusType;
+  buyerBrusName: string;
   brusAmount: number;
 }
