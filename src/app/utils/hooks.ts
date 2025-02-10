@@ -1,4 +1,4 @@
-import { API_URL, REFETCH_MEMEBRS_ROUTE, USERS_ROUTE } from "./constants";
+import { API_URL, REFETCH_MEMBERS_ROUTE, USERS_ROUTE } from "./constants";
 import { User } from "./interfaces";
 
 export const getUsers = async (): Promise<User[]> => {
@@ -15,7 +15,7 @@ export const getUsers = async (): Promise<User[]> => {
 };
 
 export const refetchActiveMembers = async () => {
-  const res = await fetch(`${API_URL}${REFETCH_MEMEBRS_ROUTE}`);
+  const res = await fetch(`${API_URL}${REFETCH_MEMBERS_ROUTE}`);
   if (res.status === 200) {
     return true;
   }
