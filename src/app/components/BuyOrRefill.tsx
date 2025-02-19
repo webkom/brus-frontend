@@ -20,13 +20,8 @@ const BuyOrRefill = ({ user, buyOrRefill }: BuyOrRefillProps) => {
   };
   const queryClient = useQueryClient();
 
-  const {
-    data: incommingUser,
-    refetch,
-    isFetching,
-    error,
-  } = useQuery({
-    queryKey: [buyOrRefill, { brusAmount: quantity, brusType: brusType }],
+  const { refetch, isFetching, error } = useQuery({
+    queryKey: [buyOrRefill, user],
     queryFn: () =>
       buyOrRefill === "buyBrus"
         ? buyBrus(brusBuyOrRefillData)
@@ -35,21 +30,23 @@ const BuyOrRefill = ({ user, buyOrRefill }: BuyOrRefillProps) => {
   });
 
   const handleBuyBrus = () => {
-    refetch();
-  };
-
-  useEffect(() => {
-    if (incommingUser) {
-      //Replace user in cache with updated user
-      queryClient.setQueryData(["users"], (usersInCache: User[]) => {
-        return usersInCache.map((userInCache) =>
-          userInCache.brusName === incommingUser.brusName
-            ? incommingUser
-            : userInCache
-        );
+    refetch()
+      .then(({ data: updatedUser }) => {
+        if (updatedUser) {
+          queryClient.setQueryData(["users"], (usersInCache: User[]) => {
+            return usersInCache.map((userInCache) =>
+              userInCache.brusName === user.brusName ? updatedUser : userInCache
+            );
+          });
+        } else {
+          // If updated data is not returned, refetch all users
+          queryClient.invalidateQueries({ queryKey: ["users"] });
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to buy brus:", error);
       });
-    }
-  }, [incommingUser, queryClient]);
+  };
 
   const fetchingText =
     buyOrRefill === "buyBrus" ? "Buying brus" : "Refilling brus";
