@@ -1,7 +1,6 @@
 import {
   API_URL,
   BRUS_COST,
-  BrusType,
   BUY_BRUS_ROUTE,
   REFETCH_MEMEBRS_ROUTE,
   REFILL_BRUS_ROUTE,
