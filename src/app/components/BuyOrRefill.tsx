@@ -1,40 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { BRUS_COST, BrusType } from "../utils/constants";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { buyBrus, refillBrus } from "../utils/hooks";
 import { BuyRefillBrusRequest, User } from "../utils/interfaces";
 
 interface BuyOrRefillProps {
-  liveUser: User;
-  setLiveUser: (user: User) => void;
+  user: User;
   buyOrRefill: "buyBrus" | "refillBrus";
 }
 
-const BuyOrRefill = ({
-  liveUser,
-  setLiveUser,
-  buyOrRefill,
-}: BuyOrRefillProps) => {
+const BuyOrRefill = ({ user, buyOrRefill }: BuyOrRefillProps) => {
   const [brusType, setBrusType] = useState<BrusType>("Dahls");
   const [quantity, setQuantity] = useState<number>(1);
+
+  const brusBuyOrRefillData: BuyRefillBrusRequest = {
+    brusAmount: quantity,
+    brusType: brusType,
+    userBrusName: user.brusName,
+  };
+  const queryClient = useQueryClient();
+
   const {
-    data: updatedUser,
+    data: incommingUser,
     refetch,
     isFetching,
+    error,
   } = useQuery({
     queryKey: [buyOrRefill, { brusAmount: quantity, brusType: brusType }],
     queryFn: () =>
       buyOrRefill === "buyBrus"
-        ? buyBrus({
-            brusAmount: quantity,
-            brusType: brusType,
-            userBrusName: liveUser.brusName,
-          })
-        : refillBrus({
-            brusAmount: quantity,
-            brusType: brusType,
-            userBrusName: liveUser.brusName,
-          }),
+        ? buyBrus(brusBuyOrRefillData)
+        : refillBrus(brusBuyOrRefillData),
     enabled: false,
   });
 
@@ -43,10 +39,17 @@ const BuyOrRefill = ({
   };
 
   useEffect(() => {
-    if (updatedUser) {
-      setLiveUser(updatedUser);
+    if (incommingUser) {
+      //Replace user in cache with updated user
+      queryClient.setQueryData(["users"], (usersInCache: User[]) => {
+        return usersInCache.map((userInCache) =>
+          userInCache.brusName === incommingUser.brusName
+            ? incommingUser
+            : userInCache
+        );
+      });
     }
-  }, [updatedUser]);
+  }, [incommingUser, queryClient]);
 
   const fetchingText =
     buyOrRefill === "buyBrus" ? "Buying brus" : "Refilling brus";
@@ -75,7 +78,10 @@ const BuyOrRefill = ({
           min={1}
         />
       </div>
-      {isFetching ? (
+
+      {error ? (
+        <p>Error: {error.message}</p>
+      ) : isFetching ? (
         <p>{fetchingText}</p>
       ) : (
         <button

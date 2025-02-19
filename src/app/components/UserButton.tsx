@@ -9,7 +9,8 @@ interface userButtonProps {
 
 export const UserButton = ({ user }: userButtonProps) => {
   const [showModal, setShowModal] = useState(false);
-  const handleUserClick = () => {
+
+  const handleModalClick = () => {
     setShowModal((prev) => !prev);
   };
 
@@ -24,7 +25,7 @@ export const UserButton = ({ user }: userButtonProps) => {
   return (
     <>
       <button
-        onClick={handleUserClick}
+        onClick={handleModalClick}
         className="flex flex-col items-center hover:cursor-pointer"
       >
         <UserImage user={user} />
@@ -34,9 +35,9 @@ export const UserButton = ({ user }: userButtonProps) => {
       {showModal && (
         <div
           className="fixed top-0 left-0 w-full h-full bg-[#ffffff34] flex items-center justify-center"
-          onClick={() => setShowModal(false)}
+          onClick={handleModalClick}
         >
-          <BuyBrusModal user={user} handleClose={() => setShowModal(false)} />
+          <BuyBrusModal user={user} handleClose={handleModalClick} />
         </div>
       )}
     </>

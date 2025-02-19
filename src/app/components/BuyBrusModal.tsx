@@ -9,10 +9,6 @@ interface BuyBrusModalProps {
 }
 
 const BuyBrusModal = ({ user, handleClose }: BuyBrusModalProps) => {
-  const [liveUser, setLiveUser] = useState(user);
-  useEffect(() => {
-    setLiveUser(user);
-  }, [user]);
   return (
     <div
       className="flex flex-col bg-green-100 rounded-sm p-4 pt-2"
@@ -34,24 +30,16 @@ const BuyBrusModal = ({ user, handleClose }: BuyBrusModalProps) => {
             <p className="whitespace-nowrap">
               Saldo:{" "}
               <span
-                className={`${liveUser.saldo > 0 ? "text-green-700" : "text-red-700"}`}
+                className={`${user.saldo > 0 ? "text-green-700" : "text-red-700"}`}
               >
-                {liveUser.saldo}
+                {user.saldo}
               </span>
             </p>
           </span>
         </div>
         <div className="flex flex-col gap-2">
-          <BuyOrRefill
-            liveUser={user}
-            setLiveUser={setLiveUser}
-            buyOrRefill="buyBrus"
-          />
-          <BuyOrRefill
-            liveUser={user}
-            setLiveUser={setLiveUser}
-            buyOrRefill="refillBrus"
-          />
+          <BuyOrRefill user={user} buyOrRefill="buyBrus" />
+          <BuyOrRefill user={user} buyOrRefill="refillBrus" />
         </div>
       </div>
     </div>
