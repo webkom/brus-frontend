@@ -2,7 +2,7 @@ import {
   API_URL,
   BRUS_COST,
   BUY_BRUS_ROUTE,
-  REFETCH_MEMEBRS_ROUTE,
+  REFETCH_MEMBERS_ROUTE,
   REFILL_BRUS_ROUTE,
   USERS_ROUTE,
 } from "./constants";
@@ -22,7 +22,7 @@ export const getUsers = async (): Promise<User[]> => {
 };
 
 export const refetchActiveMembers = async () => {
-  const res = await fetch(`${API_URL}${REFETCH_MEMEBRS_ROUTE}`);
+  const res = await fetch(`${API_URL}${REFETCH_MEMBERS_ROUTE}`);
   if (res.status === 200) {
     return true;
   }
